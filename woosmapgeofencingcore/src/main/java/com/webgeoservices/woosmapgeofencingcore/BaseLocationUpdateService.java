@@ -211,10 +211,10 @@ public abstract class BaseLocationUpdateService extends Service {
         }
     }
 
-    abstract void removeLocationUpdates();
+    public abstract void removeLocationUpdates();
 
-    abstract void onNewLocation(Location location);
+    public abstract void onNewLocation(Location location);
 
-    abstract void enableLocationBackground(boolean enable);
+    public abstract void enableLocationBackground(boolean enable);
 
 }

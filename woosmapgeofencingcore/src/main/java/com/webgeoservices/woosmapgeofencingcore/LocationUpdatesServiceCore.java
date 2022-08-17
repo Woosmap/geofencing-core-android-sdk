@@ -110,7 +110,7 @@ public class LocationUpdatesServiceCore extends BaseLocationUpdateService {
     }
 
     @Override
-    void enableLocationBackground(boolean enable) {
+    public void enableLocationBackground(boolean enable) {
         Log.i(TAG, "enableLocationBackground");
         try {
             mFusedLocationClient.requestLocationUpdates(mLocationRequest,
@@ -134,12 +134,12 @@ public class LocationUpdatesServiceCore extends BaseLocationUpdateService {
     }
 
     @Override
-    void removeLocationUpdates() {
+    public void removeLocationUpdates() {
         removeLocationUpdates(mLocationCallback);
     }
 
     @Override
-    void onNewLocation(Location location) {
+    public void onNewLocation(Location location) {
         updateLocation(location);
     }
 

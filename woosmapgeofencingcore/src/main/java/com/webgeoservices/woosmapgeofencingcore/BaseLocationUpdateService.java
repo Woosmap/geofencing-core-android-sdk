@@ -33,7 +33,7 @@ public abstract class BaseLocationUpdateService extends Service {
     private static final String TAG = BaseLocationUpdateService.class.getSimpleName();
 
 
-    private int message_icon;
+
     protected NotificationManager mNotificationManager;
     protected LocationRequest mLocationRequest;
 
@@ -124,7 +124,7 @@ public abstract class BaseLocationUpdateService extends Service {
         return finePermissionState == PackageManager.PERMISSION_GRANTED;
     }
 
-    protected Notification getNotification(Class<?> cls, Location mLocation, String EXTRA_STARTED_FROM_NOTIFICATION) {
+    protected Notification getNotification(Class<?> cls, Location mLocation, String EXTRA_STARTED_FROM_NOTIFICATION,int message_icon) {
         Intent intent = new Intent(this, cls);
 
         //create channel
@@ -163,7 +163,6 @@ public abstract class BaseLocationUpdateService extends Service {
 
         Intent newIntent = pm.getLaunchIntentForPackage(this.getPackageName());
         PendingIntent mPendingIntent = PendingIntent.getActivity(this, 0, newIntent, flags);
-        setIconFromManifestVariable();
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         return builder
                 .setContentText(text)
@@ -179,21 +178,7 @@ public abstract class BaseLocationUpdateService extends Service {
 
     }
 
-    private void setIconFromManifestVariable() {
-        ApplicationInfo mApplicationInfo;
-        try {
-            mApplicationInfo = getApplication().getPackageManager().getApplicationInfo(getApplication().getPackageName(), PackageManager.GET_META_DATA);
-            Bundle bundle = mApplicationInfo.metaData;
-            if (bundle.containsKey("woosmap.messaging.default_notification_icon")) {
-                this.message_icon = bundle.getInt("woosmap.messaging.default_notification_icon", R.drawable.ic_local_grocery_store_black_24dp);
-            } else {
-                this.message_icon = R.drawable.ic_local_grocery_store_black_24dp;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            this.message_icon = R.drawable.ic_local_grocery_store_black_24dp;
-        }
-    }
+
 
     private String getLocationText(Location location) {
         if (WoosmapSettingsCore.updateServiceNotificationText.isEmpty()) {

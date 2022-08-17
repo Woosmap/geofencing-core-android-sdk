@@ -29,24 +29,22 @@ import java.util.concurrent.Executors;
 public abstract class WoosmapProvider {
 
     protected Context context;
-    protected LocationManagerCore locationManager;
     protected Boolean isForegroundEnabled = false;
     protected String asyncTrackNotifOpened = null;
 
-    LocationReadyListener locationReadyListener = null;
-    SearchAPIReadyListener searchAPIReadyListener = null;
-    VisitReadyListener visitReadyListener = null;
-    DistanceReadyListener distanceReadyListener = null;
-    RegionReadyListener regionReadyListener = null;
-    RegionLogReadyListener regionLogReadyListener = null;
+    protected LocationReadyListener locationReadyListener = null;
+    protected SearchAPIReadyListener searchAPIReadyListener = null;
+    protected VisitReadyListener visitReadyListener = null;
+    protected DistanceReadyListener distanceReadyListener = null;
+    protected RegionReadyListener regionReadyListener = null;
+    protected RegionLogReadyListener regionLogReadyListener = null;
 
-    ProfileReadyListener profileReadyListener = null;
+    protected ProfileReadyListener profileReadyListener = null;
 
-    private LocationUpdatesServiceCore mLocationUpdateService = null;
+
 
     protected void setupWoosmap(Context context) {
         this.context = context;
-        this.locationManager = new LocationManagerCore(context, this);
     }
 
     public interface LocationReadyListener {
@@ -133,14 +131,7 @@ public abstract class WoosmapProvider {
         void ProfileReadyCallback(Boolean status, ArrayList<String> errors);
     }
 
-    public final class ConfigurationProfile {
 
-        public static final String liveTracking = "liveTracking";
-        public static final String passiveTracking = "passiveTracking";
-        public static final String visitsTracking = "visitsTracking";
-
-        private ConfigurationProfile() { }
-    }
 
 
     /**
@@ -230,113 +221,22 @@ public abstract class WoosmapProvider {
     /**
      * Should be call on your mainActivity onResume method
      */
-    public void onResume() {
-        if(!WoosmapSettingsCore.trackingEnable) {
-            return;
-        }
-        this.isForegroundEnabled = true;
-        if (this.shouldTrackUser()) {
-            this.locationManager.updateLocationForeground();
-        } else {
-            Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Get Location permissions error");
-        }
-
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                WoosmapDb.getInstance(context).cleanOldGeographicData(context);
-            }
-        });
-
-        if(mLocationUpdateService != null && WoosmapSettingsCore.foregroundLocationServiceEnable) {
-            mLocationUpdateService.removeLocationUpdates();
-        }
-
-    }
+    public abstract void onResume();
 
     /**
      * Should be call on your mainActivity onPause method
      */
-    public void onPause() {
-        if(!WoosmapSettingsCore.trackingEnable) {
-            return;
-        }
-
-        WoosmapSettingsCore.saveSettings(context);
-
-        if(WoosmapSettingsCore.foregroundLocationServiceEnable){
-            if(mLocationUpdateService != null ) {
-                mLocationUpdateService.enableLocationBackground( true );
-            }else {
-                // Bind to the service. If the service is in foreground mode, this signals to the service
-                // that since this activity is in the foreground, the service can exit foreground mode.
-                context.getApplicationContext().bindService(new Intent(context.getApplicationContext(), LocationUpdatesServiceCore.class), mServiceConnection,Context.BIND_AUTO_CREATE);
-            }
-        }
+    public abstract void onPause();
 
 
-        try {
-            if (this.shouldTrackUser()) {
-                this.isForegroundEnabled = false;
-                this.locationManager.updateLocationBackground();
-            } else {
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Get Location permissions error");
-            }
-        } catch (NullPointerException e) {
-            Log.d("WoosmapGeofencing", "Foreground inactive");
-        }
-    }
+    protected abstract void onReboot();
+    public abstract void onDestroy();
 
+    protected abstract Boolean shouldTrackUser();
 
-    void onReboot() {
-        this.isForegroundEnabled = false;
-        if(!WoosmapSettingsCore.trackingEnable) {
-            return;
-        }
-        if (this.shouldTrackUser()) {
-            this.locationManager.setmLocationRequest();
-            this.locationManager.updateLocationBackground();
-            this.locationManager.setMonitoringRegions();
-        } else {
-            Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Get Location permissions error");
-        }
-    }
+    public abstract Boolean enableTracking(boolean trackingEnable);
 
-    public void onDestroy() {
-        if (mLocationUpdateService != null && WoosmapSettingsCore.foregroundLocationServiceEnable) {
-            mLocationUpdateService.removeLocationUpdates();
-        }
-        if (WoosmapSettingsCore.trackingEnable && mLocationUpdateService != null) {
-            context.getApplicationContext().unbindService(mServiceConnection);
-        }
-        mLocationUpdateService = null;
-    }
-
-
-    private Boolean shouldTrackUser() {
-        return this.locationManager.checkPermissions();
-    }
-
-    public Boolean enableTracking(boolean trackingEnable) {
-        WoosmapSettingsCore.trackingEnable = trackingEnable;
-        if(WoosmapSettingsCore.trackingEnable) {
-            onResume();
-            return true;
-        } else {
-            this.locationManager.removeLocationUpdates();
-            return false;
-        }
-    }
-
-    public void enableModeHighFrequencyLocation(boolean modeHighFrequencyLocationEnable) {
-        WoosmapSettingsCore.modeHighFrequencyLocation = modeHighFrequencyLocationEnable;
-        if(WoosmapSettingsCore.modeHighFrequencyLocation) {
-            WoosmapSettingsCore.visitEnable = false;
-            WoosmapSettingsCore.classificationEnable = false;
-        }
-
-        onResume();
-    }
+    public abstract void enableModeHighFrequencyLocation(boolean modeHighFrequencyLocationEnable);
 
 
     protected void woosmapInitFunctionality(){
@@ -344,9 +244,7 @@ public abstract class WoosmapProvider {
         if (asyncTrackNotifOpened != null) {
             asyncTrackNotifOpened = null;
         }
-        if (isForegroundEnabled) {
-            onResume();
-        }
+
     }
     @RequiresApi(26)
     public void createWoosmapNotifChannel() {
@@ -365,59 +263,21 @@ public abstract class WoosmapProvider {
         Objects.requireNonNull(mNotificationManager).createNotificationChannel(mChannel);
     }
 
-    public void addGeofence(String id, LatLng latLng, float radius, String type) {
-        addGeofence( id,latLng,radius, "", type);
-    }
+    public abstract void addGeofence(String id, LatLng latLng, float radius, String type);
 
-    public void addGeofence(String id, LatLng latLng, float radius) {
-        addGeofence( id,latLng,radius, "", "circle" );
-    }
+    public abstract void addGeofence(String id, LatLng latLng, float radius);
 
-    public void addGeofence(String id, LatLng latLng, float radius, String idStore, String type) {
-        locationManager.addGeofence( id,latLng,radius, idStore, type );
-    }
+    public abstract void addGeofence(String id, LatLng latLng, float radius, String idStore, String type);
 
-    public void removeGeofence(String id) {
-        locationManager.removeGeofences(id);
-    }
-    public void removeGeofence() { locationManager.removeGeofences();}
+    public abstract void removeGeofence(String id);
+    public abstract void removeGeofence();
 
-    public void replaceGeofence(String oldId, String newId, LatLng latLng, float radius){
-        locationManager.replaceGeofence(oldId, newId, latLng, radius, "circle");
-    }
+    public abstract void replaceGeofence(String oldId, String newId, LatLng latLng, float radius);
 
-    public void replaceGeofence(String oldId, String newId, LatLng latLng, float radius, String type){
-        locationManager.replaceGeofence(oldId, newId, latLng, radius, type);
-    }
+    public abstract void replaceGeofence(String oldId, String newId, LatLng latLng, float radius, String type);
 
-    // Monitors the state of the connection to the service.
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
 
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.i("LocationUpdatesService", "onServiceConnected");
-            LocationUpdatesServiceCore.LocalBinder binder = (LocationUpdatesServiceCore.LocalBinder) service;
-            mLocationUpdateService = binder.getService();
-            mLocationUpdateService.enableLocationBackground( true );
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.i("LocationUpdatesService", "onServiceDisconnected");
-            mLocationUpdateService = null;
-        }
-    };
-
-    public void getLastRegionState() {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                RegionLog rLog = WoosmapDb.getInstance(context).getRegionLogsDAO().getLastRegionLog();
-                if (regionLogReadyListener != null && rLog != null) {
-                    regionLogReadyListener.RegionLogReadyCallback(rLog);
-                }
-            }
-        });
-    }
+    public abstract void getLastRegionState();
 
 }

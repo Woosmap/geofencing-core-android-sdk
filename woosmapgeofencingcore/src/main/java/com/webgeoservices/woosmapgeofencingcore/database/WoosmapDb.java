@@ -10,7 +10,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import com.webgeoservices.woosmapgeofencingcore.FigmmForVisitsCreator;
+import com.webgeoservices.woosmapgeofencingcore.FigmmForVisitsCreatorCore;
 import com.webgeoservices.woosmapgeofencingcore.WoosmapSettingsCore;
 
 @Database(entities = {Visit.class, MovingPosition.class, POI.class, ZOI.class, Region.class, RegionLog.class, Distance.class}, version = 31, exportSchema = false)
@@ -57,7 +57,7 @@ public abstract class WoosmapDb extends RoomDatabase {
             long dateNow = System.currentTimeMillis();
             long timeDiffFromNow = dateNow - lastUpdate;
             //update date if no updating since 1 day
-            FigmmForVisitsCreator figmmForVisitsCreator = new FigmmForVisitsCreator(WoosmapDb.getInstance(context));
+            FigmmForVisitsCreatorCore figmmForVisitsCreator = new FigmmForVisitsCreatorCore(WoosmapDb.getInstance(context));
             if (timeDiffFromNow > 86400000) {
                 figmmForVisitsCreator.deleteVisitOnZoi(dateNow - WoosmapSettingsCore.dataDurationDelay);
                 getVisitsDao().deleteVisitOlderThan(dateNow - WoosmapSettingsCore.dataDurationDelay);

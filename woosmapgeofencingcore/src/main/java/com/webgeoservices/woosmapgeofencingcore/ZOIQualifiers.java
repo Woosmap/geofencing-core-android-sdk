@@ -23,7 +23,7 @@ public class ZOIQualifiers {
     List<Map> WORK_PERIOD = new ArrayList<>();
 
 
-    void updateZoisQualifications(List<Map> zois) {
+    public void updateZoisQualifications(List<Map> zois) {
         if (WoosmapSettingsCore.classificationEnable == false) {
             return;
         }

@@ -37,7 +37,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.webgeoservices.samplecore.model.PlaceData;
-import com.webgeoservices.woosmapgeofencingcore.FigmmForVisitsCreator;
+import com.webgeoservices.woosmapgeofencingcore.FigmmForVisitsCreatorCore;
 import com.webgeoservices.woosmapgeofencingcore.PositionsManagerCore;
 import com.webgeoservices.woosmapgeofencingcore.WoosmapCore;
 import com.webgeoservices.woosmapgeofencingcore.WoosmapSettingsCore;
@@ -856,7 +856,7 @@ public class MainActivity extends AppCompatActivity {
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss+SS");
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             String line = null;
-            FigmmForVisitsCreator figmmForVisitsCreator = new FigmmForVisitsCreator(WoosmapDb.getInstance(mContext));
+            FigmmForVisitsCreatorCore figmmForVisitsCreator = new FigmmForVisitsCreatorCore(WoosmapDb.getInstance(mContext));
             try {
                 int i = 0;
                 while ((line = reader.readLine()) != null) {

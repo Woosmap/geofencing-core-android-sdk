@@ -22,7 +22,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
 
-public class FigmmForVisitsCreator {
+public class FigmmForVisitsCreatorCore {
     List<Map> list_zois = new ArrayList<>();
     List<Map> list_zois_to_delete = new ArrayList<>();
     int age_min = 5;
@@ -32,11 +32,11 @@ public class FigmmForVisitsCreator {
 
     WoosmapDb db_m;
 
-    public FigmmForVisitsCreator(WoosmapDb db) {
+    public FigmmForVisitsCreatorCore(WoosmapDb db) {
         this.db_m = db;
     }
 
-    public FigmmForVisitsCreator() {
+    public FigmmForVisitsCreatorCore() {
 
     }
 

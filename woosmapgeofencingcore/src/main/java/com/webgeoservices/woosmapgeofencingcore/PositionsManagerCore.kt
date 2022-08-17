@@ -842,7 +842,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
 
         if (visit.duration >= WoosmapSettingsCore.durationVisitFilter) {
             // Refresh zoi on Visit
-            val figmmForVisitsCreator = FigmmForVisitsCreator(db)
+            val figmmForVisitsCreator = FigmmForVisitsCreatorCore(db)
             figmmForVisitsCreator.figmmForVisit(visit)
 
             this.db.visitsDao.updateStaticPosition(visit)

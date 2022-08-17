@@ -18,7 +18,7 @@ import java.util.HashMap;
  * Data container class which holds the data returned by <code>details</code> method
  */
 public class SearchAPIResponseItemCore implements Parcelable {
-    private static final String TAG= SearchAPIResponseItemCore.class.getSimpleName();
+    private static final String TAG = SearchAPIResponseItemCore.class.getSimpleName();
     public String idstore;
     public String city;
     public String zipCode;
@@ -37,7 +37,7 @@ public class SearchAPIResponseItemCore implements Parcelable {
     /***
      * protected constructor
      */
-    protected SearchAPIResponseItemCore(){
+    protected SearchAPIResponseItemCore() {
     }
 
     /***
@@ -52,8 +52,8 @@ public class SearchAPIResponseItemCore implements Parcelable {
             types = in.createStringArray();
             item = new JSONObject(in.readString());
             geometry = in.readParcelable(Geometry.class.getClassLoader());
-        }catch (JSONException ex){
-            Log.e(TAG,ex.getMessage());
+        } catch (JSONException ex) {
+            Log.e(TAG, ex.getMessage());
         }
 
     }
@@ -115,6 +115,7 @@ public class SearchAPIResponseItemCore implements Parcelable {
 
     /**
      * Array of feature types describing the given item (like <code>locality</code> or <code>postal_town</code>)
+     *
      * @return String Array
      */
     public String[] getTypes() {
@@ -143,10 +144,9 @@ public class SearchAPIResponseItemCore implements Parcelable {
      * @param jsonObject - Raw json response returned from the API
      * @return <code>SearchAPIResponseItemCore</code> object
      */
-    public static SearchAPIResponseItemCore fromJSON(JSONObject jsonObject){
+    public static SearchAPIResponseItemCore fromJSON(JSONObject jsonObject) {
         return populateStoreDetail(jsonObject);
     }
-
 
 
     /***
@@ -154,59 +154,59 @@ public class SearchAPIResponseItemCore implements Parcelable {
      * @param jsonObject RAW json response returned by <code>store</code> API
      * @return <code>SearchAPIResponseItemCore</code> object
      */
-    protected static SearchAPIResponseItemCore populateStoreDetail(JSONObject jsonObject){
-        SearchAPIResponseItemCore detailsResponseItem=new SearchAPIResponseItemCore();
+    protected static SearchAPIResponseItemCore populateStoreDetail(JSONObject jsonObject) {
+        SearchAPIResponseItemCore detailsResponseItem = new SearchAPIResponseItemCore();
         JSONObject properties;
         JSONArray addressLineArray;
-        try{
-            properties=jsonObject.getJSONObject("properties");
+        try {
+            properties = jsonObject.getJSONObject("properties");
             detailsResponseItem.idstore = properties.getString("store_id");
             detailsResponseItem.contact = properties.getString("contact");
             detailsResponseItem.distance = (Double) properties.get("distance");
 
-            if(properties.has("open")){
-                detailsResponseItem.openNow = properties.getJSONObject("open").getBoolean( "open_now" );
+            if (properties.has("open")) {
+                detailsResponseItem.openNow = properties.getJSONObject("open").getBoolean("open_now");
             }
 
-            if(properties.has("address")){
-                addressLineArray=properties.getJSONObject("address").getJSONArray("lines");
-                StringBuilder formattedAddress=new StringBuilder();
-                for(int i=0;i<addressLineArray.length();i++){
-                    if(addressLineArray.getString(i) != "null")
+            if (properties.has("address")) {
+                addressLineArray = properties.getJSONObject("address").getJSONArray("lines");
+                StringBuilder formattedAddress = new StringBuilder();
+                for (int i = 0; i < addressLineArray.length(); i++) {
+                    if (addressLineArray.getString(i) != "null")
                         formattedAddress.append(addressLineArray.getString(i));
                 }
-                detailsResponseItem.formattedAddress=formattedAddress.toString().trim();
+                detailsResponseItem.formattedAddress = formattedAddress.toString().trim();
                 detailsResponseItem.city = properties.getJSONObject("address").getString("city");
                 detailsResponseItem.zipCode = properties.getJSONObject("address").getString("zipcode");
                 detailsResponseItem.countryCode = properties.getJSONObject("address").getString("country_code");
-            }else {
-                detailsResponseItem.formattedAddress=properties.getString("name");
+            } else {
+                detailsResponseItem.formattedAddress = properties.getString("name");
             }
-            JSONArray typesArray=properties.getJSONArray("types");
-            if(typesArray.length()>0){
-                String[] types=new String[typesArray.length()];
-                for(int i=0;i<typesArray.length();i++){
-                    types[i]=typesArray.getString(i);
+            JSONArray typesArray = properties.getJSONArray("types");
+            if (typesArray.length() > 0) {
+                String[] types = new String[typesArray.length()];
+                for (int i = 0; i < typesArray.length(); i++) {
+                    types[i] = typesArray.getString(i);
                 }
-                detailsResponseItem.types= types;
-            }else {
-                detailsResponseItem.types=new String[0];
+                detailsResponseItem.types = types;
+            } else {
+                detailsResponseItem.types = new String[0];
             }
 
-            JSONArray tagsArray=properties.getJSONArray("tags");
-            if(tagsArray.length()>0){
-                String[] tags=new String[tagsArray.length()];
-                for(int i=0;i<tagsArray.length();i++){
-                    tags[i]=tagsArray.getString(i);
+            JSONArray tagsArray = properties.getJSONArray("tags");
+            if (tagsArray.length() > 0) {
+                String[] tags = new String[tagsArray.length()];
+                for (int i = 0; i < tagsArray.length(); i++) {
+                    tags[i] = tagsArray.getString(i);
                 }
-                detailsResponseItem.tags= tags;
-            }else {
-                detailsResponseItem.tags=new String[0];
+                detailsResponseItem.tags = tags;
+            } else {
+                detailsResponseItem.tags = new String[0];
             }
-            detailsResponseItem.item=jsonObject;
-            detailsResponseItem.name=properties.getString("name");
+            detailsResponseItem.item = jsonObject;
+            detailsResponseItem.name = properties.getString("name");
 
-            if (jsonObject.has("geometry")){
+            if (jsonObject.has("geometry")) {
                 Geometry geometryDetail = new Geometry();
 
                 geometryDetail.setLocation(new Location(
@@ -217,8 +217,8 @@ public class SearchAPIResponseItemCore implements Parcelable {
                 detailsResponseItem.geometry = geometryDetail;
             }
 
-        }catch (Exception ex){
-            Log.e(TAG,ex.getMessage(),ex);
+        } catch (Exception ex) {
+            Log.e(TAG, ex.getMessage(), ex);
             return null;
         }
         return detailsResponseItem;
@@ -230,28 +230,28 @@ public class SearchAPIResponseItemCore implements Parcelable {
      * @param jsonObject RAW json response returned by <code>store</code> API
      * @return <code>userPropertiesFiltered</code> object
      */
-    public static HashMap<String, Object> getUserProperties(JSONObject jsonObject, String storeId){
+    public static HashMap<String, Object> getUserProperties(JSONObject jsonObject, String storeId) {
         HashMap<String, Object> userPropertiesFiltered = new HashMap<String, Object>();
-        SearchAPIResponseItemCore detailsResponseItem=new SearchAPIResponseItemCore();
+        SearchAPIResponseItemCore detailsResponseItem = new SearchAPIResponseItemCore();
         JSONObject properties;
 
-        try{
+        try {
             JSONArray features = jsonObject.getJSONArray("features");
             if (features.length() > 0) {
-                for(int i=0;i<features.length();i++){
-                    JSONObject feature = features.getJSONObject( i );
-                    properties=feature.getJSONObject("properties");
-                    if(properties.getString("store_id").equals(storeId)) {
-                        if(properties.has("user_properties")) {
-                            detailsResponseItem.userProperties = new Gson().fromJson( properties.get( "user_properties" ).toString(), HashMap.class );
+                for (int i = 0; i < features.length(); i++) {
+                    JSONObject feature = features.getJSONObject(i);
+                    properties = feature.getJSONObject("properties");
+                    if (properties.getString("store_id").equals(storeId)) {
+                        if (properties.has("user_properties")) {
+                            detailsResponseItem.userProperties = new Gson().fromJson(properties.get("user_properties").toString(), HashMap.class);
                             if (WoosmapSettingsCore.userPropertiesFilter.isEmpty()) {
                                 userPropertiesFiltered = detailsResponseItem.userProperties;
                             } else {
                                 for (String key : WoosmapSettingsCore.userPropertiesFilter) {
-                                    if (detailsResponseItem.userProperties != null && detailsResponseItem.userProperties.get( key ) != null ) {
-                                        userPropertiesFiltered.put( key, detailsResponseItem.userProperties.get( key ) );
+                                    if (detailsResponseItem.userProperties != null && detailsResponseItem.userProperties.get(key) != null) {
+                                        userPropertiesFiltered.put(key, detailsResponseItem.userProperties.get(key));
                                     } else {
-                                        userPropertiesFiltered.put( key, "null" );
+                                        userPropertiesFiltered.put(key, "null");
                                     }
                                 }
                             }
@@ -259,8 +259,8 @@ public class SearchAPIResponseItemCore implements Parcelable {
                     }
                 }
             }
-        }catch (Exception ex){
-            Log.e(TAG,ex.getMessage());
+        } catch (Exception ex) {
+            Log.e(TAG, ex.getMessage());
         }
         return userPropertiesFiltered;
     }

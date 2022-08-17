@@ -30,7 +30,7 @@ import com.google.android.gms.location.LocationServices;
 
 public abstract class BaseLocationUpdateService extends Service {
 
-    private static final String TAG=BaseLocationUpdateService.class.getSimpleName();
+    private static final String TAG = BaseLocationUpdateService.class.getSimpleName();
 
 
     private int message_icon;
@@ -51,14 +51,13 @@ public abstract class BaseLocationUpdateService extends Service {
      * The fastest rate for active location updates. Updates will never be more frequent
      * than this value.
      */
-    protected  final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
+    protected final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
     /**
      * The identifier for the notification displayed for the foreground service.
      */
-    protected  final int NOTIFICATION_ID = 20200520;
-
+    protected final int NOTIFICATION_ID = 20200520;
 
 
     /**
@@ -99,7 +98,6 @@ public abstract class BaseLocationUpdateService extends Service {
     }
 
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -125,6 +123,7 @@ public abstract class BaseLocationUpdateService extends Service {
                 android.Manifest.permission.ACCESS_FINE_LOCATION);
         return finePermissionState == PackageManager.PERMISSION_GRANTED;
     }
+
     protected Notification getNotification(Class<?> cls, Location mLocation, String EXTRA_STARTED_FROM_NOTIFICATION) {
         Intent intent = new Intent(this, cls);
 
@@ -138,7 +137,7 @@ public abstract class BaseLocationUpdateService extends Service {
 
             String CHANNEL_ID = WoosmapSettingsCore.WoosmapNotificationChannelID;
             int active = NotificationManager.IMPORTANCE_NONE;
-            if(WoosmapSettingsCore.WoosmapNotificationActive) {
+            if (WoosmapSettingsCore.WoosmapNotificationActive) {
                 active = NotificationManager.IMPORTANCE_HIGH;
             }
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, WoosmapSettingsCore.WoosmapNotificationChannelName, active);
@@ -163,7 +162,7 @@ public abstract class BaseLocationUpdateService extends Service {
         PendingIntent servicePendingIntent = PendingIntent.getService(this, 0, intent, flags);
 
         Intent newIntent = pm.getLaunchIntentForPackage(this.getPackageName());
-        PendingIntent mPendingIntent = PendingIntent.getActivity(this,0, newIntent,  flags);
+        PendingIntent mPendingIntent = PendingIntent.getActivity(this, 0, newIntent, flags);
         setIconFromManifestVariable();
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         return builder
@@ -172,21 +171,22 @@ public abstract class BaseLocationUpdateService extends Service {
                 .setOngoing(true)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                 .setPriority(Notification.PRIORITY_MIN)
-                .setSmallIcon( message_icon )
-                .setSound( defaultSoundUri )
+                .setSmallIcon(message_icon)
+                .setSound(defaultSoundUri)
                 .setTicker(text)
                 .setContentIntent(mPendingIntent)
                 .setWhen(System.currentTimeMillis()).build();
 
     }
+
     private void setIconFromManifestVariable() {
         ApplicationInfo mApplicationInfo;
         try {
             mApplicationInfo = getApplication().getPackageManager().getApplicationInfo(getApplication().getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = mApplicationInfo.metaData;
-            if(bundle.containsKey("woosmap.messaging.default_notification_icon")){
+            if (bundle.containsKey("woosmap.messaging.default_notification_icon")) {
                 this.message_icon = bundle.getInt("woosmap.messaging.default_notification_icon", R.drawable.ic_local_grocery_store_black_24dp);
-            }else {
+            } else {
                 this.message_icon = R.drawable.ic_local_grocery_store_black_24dp;
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -194,14 +194,16 @@ public abstract class BaseLocationUpdateService extends Service {
             this.message_icon = R.drawable.ic_local_grocery_store_black_24dp;
         }
     }
+
     private String getLocationText(Location location) {
-        if(WoosmapSettingsCore.updateServiceNotificationText.isEmpty()) {
+        if (WoosmapSettingsCore.updateServiceNotificationText.isEmpty()) {
             return location == null ? "Unknown location" :
                     "(" + location.getLatitude() + ", " + location.getLongitude() + ")";
         } else {
             return WoosmapSettingsCore.updateServiceNotificationText;
         }
     }
+
     /**
      * Sets the location request parameters.
      */
@@ -211,10 +213,11 @@ public abstract class BaseLocationUpdateService extends Service {
         mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
+
     protected void removeLocationUpdates(LocationCallback mLocationCallback) {
         Log.i(TAG, "Removing location updates");
         try {
-            if(mLocationCallback!=null){
+            if (mLocationCallback != null) {
                 mFusedLocationClient.removeLocationUpdates(mLocationCallback);
             }
             stopForeground(true);
@@ -224,7 +227,9 @@ public abstract class BaseLocationUpdateService extends Service {
     }
 
     abstract void removeLocationUpdates();
+
     abstract void onNewLocation(Location location);
+
     abstract void enableLocationBackground(boolean enable);
 
 }

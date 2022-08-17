@@ -1,7 +1,6 @@
 package com.webgeoservices.woosmapgeofencingcore;
 
 
-
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -336,7 +335,7 @@ public class WoosmapMessageBuilderMaps {
     public String getStoreAPIUrl(Double lat, Double lng) {
         String url = String.format(WoosmapSettingsCore.SearchAPIUrl, WoosmapSettingsCore.WoosmapURL, WoosmapSettingsCore.privateKeyWoosmapAPI, lat, lng);
         if (!WoosmapSettingsCore.searchAPIParameters.isEmpty()) {
-            StringBuilder stringBuilder =  new StringBuilder(url);
+            StringBuilder stringBuilder = new StringBuilder(url);
 
             for (Map.Entry<String, String> entry : WoosmapSettingsCore.searchAPIParameters.entrySet()) {
                 stringBuilder.append("&" + entry.getKey() + "=" + entry.getValue());

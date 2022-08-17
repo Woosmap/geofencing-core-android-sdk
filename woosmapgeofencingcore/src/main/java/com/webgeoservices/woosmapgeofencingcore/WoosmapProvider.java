@@ -3,14 +3,9 @@ package com.webgeoservices.woosmapgeofencingcore;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.location.Location;
-import android.os.IBinder;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -20,11 +15,9 @@ import com.webgeoservices.woosmapgeofencingcore.database.POI;
 import com.webgeoservices.woosmapgeofencingcore.database.Region;
 import com.webgeoservices.woosmapgeofencingcore.database.RegionLog;
 import com.webgeoservices.woosmapgeofencingcore.database.Visit;
-import com.webgeoservices.woosmapgeofencingcore.database.WoosmapDb;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.Executors;
 
 public abstract class WoosmapProvider {
 
@@ -40,7 +33,6 @@ public abstract class WoosmapProvider {
     public RegionLogReadyListener regionLogReadyListener = null;
 
     public ProfileReadyListener profileReadyListener = null;
-
 
 
     protected void setupWoosmap(Context context) {
@@ -132,8 +124,6 @@ public abstract class WoosmapProvider {
     }
 
 
-
-
     /**
      * Add a listener to get callback on new locations
      *
@@ -191,7 +181,7 @@ public abstract class WoosmapProvider {
      * @see RegionLogReadyListener
      */
     public void setRegionLogReadyListener(RegionLogReadyListener regionLogReadyListener) {
-        setRegionLogReadyListener(regionLogReadyListener,false);
+        setRegionLogReadyListener(regionLogReadyListener, false);
     }
 
     /**
@@ -202,7 +192,7 @@ public abstract class WoosmapProvider {
      */
     public void setRegionLogReadyListener(RegionLogReadyListener regionLogReadyListener, Boolean sendCurrentState) {
         this.regionLogReadyListener = regionLogReadyListener;
-        if(sendCurrentState) {
+        if (sendCurrentState) {
             getLastRegionState();
         }
     }
@@ -230,6 +220,7 @@ public abstract class WoosmapProvider {
 
 
     public abstract void onReboot();
+
     public abstract void onDestroy();
 
     protected abstract Boolean shouldTrackUser();
@@ -239,13 +230,14 @@ public abstract class WoosmapProvider {
     public abstract void enableModeHighFrequencyLocation(boolean modeHighFrequencyLocationEnable);
 
 
-    protected void woosmapInitFunctionality(){
+    protected void woosmapInitFunctionality() {
         /* Send notifications is opened async if the app was killed */
         if (asyncTrackNotifOpened != null) {
             asyncTrackNotifOpened = null;
         }
 
     }
+
     @RequiresApi(26)
     public void createWoosmapNotifChannel() {
         NotificationManager mNotificationManager =
@@ -270,12 +262,12 @@ public abstract class WoosmapProvider {
     public abstract void addGeofence(String id, LatLng latLng, float radius, String idStore, String type);
 
     public abstract void removeGeofence(String id);
+
     public abstract void removeGeofence();
 
     public abstract void replaceGeofence(String oldId, String newId, LatLng latLng, float radius);
 
     public abstract void replaceGeofence(String oldId, String newId, LatLng latLng, float radius, String type);
-
 
 
     public abstract void getLastRegionState();

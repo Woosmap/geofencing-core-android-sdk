@@ -36,7 +36,7 @@ public abstract class LocationManagerProvider {
         geofenceHelper = new GeofenceHelper(context);
     }
 
-    protected boolean checkPermissions() {
+    public boolean checkPermissions() {
         int finePermissionState = ActivityCompat.checkSelfPermission(this.context,
                 android.Manifest.permission.ACCESS_FINE_LOCATION);
         int coarsePermissionState = ActivityCompat.checkSelfPermission(this.context,
@@ -52,11 +52,11 @@ public abstract class LocationManagerProvider {
 
     public abstract void addGeofence(final String id, final LatLng latLng, final float radius, final String idStore, String type);
 
-    protected void setmLocationRequest() {
+    public void setmLocationRequest() {
         mLocationRequest = new LocationRequest();
     }
 
-    protected void updateLocationForeground() {
+    public void updateLocationForeground() {
         if (mLocationRequest == null) {
             this.setmLocationRequest();
         }
@@ -78,7 +78,7 @@ public abstract class LocationManagerProvider {
         }
     }
 
-    protected void updateLocationBackground() {
+    public void updateLocationBackground() {
         if (WoosmapSettingsCore.foregroundLocationServiceEnable) {
             mFusedLocationClient.removeLocationUpdates(mLocationIntent);
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
@@ -104,7 +104,7 @@ public abstract class LocationManagerProvider {
         }
     }
 
-    protected void removeLocationUpdates() {
+    public void removeLocationUpdates() {
         try {
             if (mFusedLocationClient != null && mLocationIntent != null) {
                 mFusedLocationClient.removeLocationUpdates(mLocationIntent);
@@ -117,7 +117,7 @@ public abstract class LocationManagerProvider {
         }
     }
 
-    protected void removeLocationCallback() {
+    public void removeLocationCallback() {
         if (mFusedLocationClient != null && mLocationCallback != null) {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
         }

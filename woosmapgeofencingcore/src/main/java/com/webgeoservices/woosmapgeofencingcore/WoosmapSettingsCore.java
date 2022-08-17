@@ -319,18 +319,18 @@ public class WoosmapSettingsCore {
 
     public static final String WoosmapSdkTag = "WoosmapSdk";
     public static final String WoosmapBackgroundTag = "WoosmapBackground";
-    public static String WoosmapVisitsTag = "WoosmapVisit";
-    public static String NotificationError = "NotificationError";
-    public static String WoosmapBroadcastTag = "WoosmapBroadcast";
-    public static String WoosmapGeofenceTag = "WoosmapGeofence";
+    public static final String WoosmapVisitsTag = "WoosmapVisit";
+    public static final String NotificationError = "NotificationError";
+    public static final String WoosmapBroadcastTag = "WoosmapBroadcast";
+    public static final String WoosmapGeofenceTag = "WoosmapGeofence";
 
 
-    protected static String WoosmapURL = "https://api.woosmap.com";
-    protected static String SearchAPIUrl = "%s/stores/search/?private_key=%s&lat=%s&lng=%s&stores_by_page=20";
-    protected static String DistanceAPIUrl ="%s/distance/distancematrix/json?mode=%s&units=%s&language=%s&origins=%s,%s&destinations=%s&private_key=%s&elements=duration_distance";
-    protected static String TrafficDistanceAPIUrl ="%s/traffic/distancematrix/json?mode=%s&units=%s&language=%s&routing=%s&origins=%s,%s&destinations=%s&private_key=%s";
-    protected static String GoogleMapStaticUrl = "https://maps.google.com/maps/api/staticmap?markers=color:red%%7C%s,%s&markers=color:blue%%7C%s,%s&zoom=14&size=400x400&sensor=true&key=%s";
-    protected static String GoogleMapStaticUrl1POI = "https://maps.google.com/maps/api/staticmap?markers=color:red%%7C%s,%s&zoom=14&size=400x400&sensor=true&key=%s";
+    public static String WoosmapURL = "https://api.woosmap.com";
+    public static String SearchAPIUrl = "%s/stores/search/?private_key=%s&lat=%s&lng=%s&stores_by_page=20";
+    public static String DistanceAPIUrl ="%s/distance/distancematrix/json?mode=%s&units=%s&language=%s&origins=%s,%s&destinations=%s&private_key=%s&elements=duration_distance";
+    public static String TrafficDistanceAPIUrl ="%s/traffic/distancematrix/json?mode=%s&units=%s&language=%s&routing=%s&origins=%s,%s&destinations=%s&private_key=%s";
+    public static String GoogleMapStaticUrl = "https://maps.google.com/maps/api/staticmap?markers=color:red%%7C%s,%s&markers=color:blue%%7C%s,%s&zoom=14&size=400x400&sensor=true&key=%s";
+    public static String GoogleMapStaticUrl1POI = "https://maps.google.com/maps/api/staticmap?markers=color:red%%7C%s,%s&zoom=14&size=400x400&sensor=true&key=%s";
 
     public static String getNotificationDefaultUri(Context context) {
         String notificationUri = "";

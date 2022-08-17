@@ -160,7 +160,7 @@ public class WoosmapCore extends WoosmapProvider{
     }
 
     @Override
-    protected void onReboot() {
+    public void onReboot() {
         this.isForegroundEnabled = false;
         if(!WoosmapSettingsCore.trackingEnable) {
             return;

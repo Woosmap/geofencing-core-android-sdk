@@ -32,14 +32,14 @@ public abstract class WoosmapProvider {
     protected Boolean isForegroundEnabled = false;
     protected String asyncTrackNotifOpened = null;
 
-    protected LocationReadyListener locationReadyListener = null;
-    protected SearchAPIReadyListener searchAPIReadyListener = null;
-    protected VisitReadyListener visitReadyListener = null;
-    protected DistanceReadyListener distanceReadyListener = null;
-    protected RegionReadyListener regionReadyListener = null;
-    protected RegionLogReadyListener regionLogReadyListener = null;
+    public LocationReadyListener locationReadyListener = null;
+    public SearchAPIReadyListener searchAPIReadyListener = null;
+    public VisitReadyListener visitReadyListener = null;
+    public DistanceReadyListener distanceReadyListener = null;
+    public RegionReadyListener regionReadyListener = null;
+    public RegionLogReadyListener regionLogReadyListener = null;
 
-    protected ProfileReadyListener profileReadyListener = null;
+    public ProfileReadyListener profileReadyListener = null;
 
 
 
@@ -229,7 +229,7 @@ public abstract class WoosmapProvider {
     public abstract void onPause();
 
 
-    protected abstract void onReboot();
+    public abstract void onReboot();
     public abstract void onDestroy();
 
     protected abstract Boolean shouldTrackUser();

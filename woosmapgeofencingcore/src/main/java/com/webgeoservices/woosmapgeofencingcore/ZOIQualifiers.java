@@ -13,14 +13,14 @@ import java.util.Set;
 import java.util.TimeZone;
 
 public class ZOIQualifiers {
-    List<Map> list_zois = new ArrayList<>();
+    protected List<Map> list_zois = new ArrayList<>();
 
-    String EXIT_TYPE = "exit";
-    String ENTRY_TYPE = "entry";
+    protected String EXIT_TYPE = "exit";
+    protected String ENTRY_TYPE = "entry";
 
-    Map<String, Object> PERIODS = new HashMap<>();
-    List<Map> HOME_PERIOD = new ArrayList<>();
-    List<Map> WORK_PERIOD = new ArrayList<>();
+    protected Map<String, Object> PERIODS = new HashMap<>();
+    protected List<Map> HOME_PERIOD = new ArrayList<>();
+    protected List<Map> WORK_PERIOD = new ArrayList<>();
 
 
     public void updateZoisQualifications(List<Map> zois) {

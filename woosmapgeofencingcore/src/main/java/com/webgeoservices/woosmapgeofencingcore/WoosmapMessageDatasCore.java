@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import java.util.Map;
 
-public class WoosmapMessageDatas {
+public class WoosmapMessageDatasCore {
     public String messageBody;
     public String title;
     public String type;
@@ -17,7 +17,7 @@ public class WoosmapMessageDatas {
     public String icon_url;
     public String timestamp;
 
-    public WoosmapMessageDatas(Map<String, String> data) {
+    public WoosmapMessageDatasCore(Map<String, String> data) {
         this.messageBody = data.get("body");
         this.title = data.get("title");
         this.type = data.get("type");
@@ -31,7 +31,7 @@ public class WoosmapMessageDatas {
         this.timestamp = data.get("timestamp");
     }
 
-    public WoosmapMessageDatas(Bundle data) {
+    public WoosmapMessageDatasCore(Bundle data) {
         this.messageBody = data.getString("body");
         this.title = data.getString("title");
         this.type = data.getString("type");

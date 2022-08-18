@@ -24,18 +24,18 @@ import java.net.URL;
 import java.util.Objects;
 import java.util.Random;
 
-public class WoosmapMessageBuilder {
+public class WoosmapMessageBuilderCore {
 
-    private final Context context;
-    private Class<?> cls = null;
-    private int message_icon;
+    protected final Context context;
+    protected Class<?> cls = null;
+    protected int message_icon;
 
-    public WoosmapMessageBuilder(Context context) {
+    public WoosmapMessageBuilderCore(Context context) {
         this.context = context;
         this.setIconFromManifestVariable();
     }
 
-    public WoosmapMessageBuilder(Context context, Class<?> cls) {
+    public WoosmapMessageBuilderCore(Context context, Class<?> cls) {
         this.context = context;
         this.cls = cls;
         this.setIconFromManifestVariable();
@@ -66,7 +66,7 @@ public class WoosmapMessageBuilder {
      *
      * @param datas FCM message body received.
      */
-    public void sendWoosmapNotification(WoosmapMessageDatas datas) {
+    public void sendWoosmapNotification(WoosmapMessageDatasCore datas) {
         Log.d("WGS_Message", datas.messageBody);
 
         NotificationManager mNotificationManager =

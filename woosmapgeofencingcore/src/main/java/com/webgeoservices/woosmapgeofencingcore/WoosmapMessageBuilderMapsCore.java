@@ -41,24 +41,24 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Random;
 
-public class WoosmapMessageBuilderMaps {
+public class WoosmapMessageBuilderMapsCore {
 
-    private final Context context;
-    private Class<?> cls = null;
-    ApplicationInfo mApplicationInfo;
-    private int message_icon;
-    private NotificationCompat.Builder mBuilder;
-    private PendingIntent mPendingIntent;
-    private NotificationManager mNotificationManager;
-    private final NotificationCompat.Style[] mStyle = new NotificationCompat.Style[1];
+    protected final Context context;
+    protected Class<?> cls = null;
+    protected ApplicationInfo mApplicationInfo;
+    protected int message_icon;
+    protected NotificationCompat.Builder mBuilder;
+    protected PendingIntent mPendingIntent;
+    protected NotificationManager mNotificationManager;
+    protected final NotificationCompat.Style[] mStyle = new NotificationCompat.Style[1];
 
 
-    public WoosmapMessageBuilderMaps(Context context) {
+    public WoosmapMessageBuilderMapsCore(Context context) {
         this.context = context;
         this.setIconFromManifestVariable();
     }
 
-    public WoosmapMessageBuilderMaps(Context context, Class<?> cls) {
+    public WoosmapMessageBuilderMapsCore(Context context, Class<?> cls) {
         this.context = context;
         this.cls = cls;
         this.setIconFromManifestVariable();
@@ -91,7 +91,7 @@ public class WoosmapMessageBuilderMaps {
      *
      * @param datas FCM message body received.
      */
-    public void sendWoosmapNotification(final WoosmapMessageDatas datas) {
+    public void sendWoosmapNotification(final WoosmapMessageDatasCore datas) {
         Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Search API");
 
         /**

@@ -23,14 +23,14 @@ import java.util.Map;
 import java.util.UUID;
 
 public class FigmmForVisitsCreatorCore {
-    protected List<Map> list_zois = new ArrayList<>();
-    protected List<Map> list_zois_to_delete = new ArrayList<>();
-    protected int age_min = 5;
-    protected int acc_min = 3;
-    protected double chi_squared_value_for_update = chi_squared_value(0.95);
-    protected Visit visit_m;
+    public List<Map> list_zois = new ArrayList<>();
+    public List<Map> list_zois_to_delete = new ArrayList<>();
+    public int age_min = 5;
+    public int acc_min = 3;
+    public double chi_squared_value_for_update = chi_squared_value(0.95);
+    public Visit visit_m;
 
-    protected WoosmapDb db_m;
+    public WoosmapDb db_m;
 
     public FigmmForVisitsCreatorCore(WoosmapDb db) {
         this.db_m = db;

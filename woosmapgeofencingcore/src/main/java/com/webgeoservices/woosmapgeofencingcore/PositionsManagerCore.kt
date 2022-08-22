@@ -160,18 +160,27 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 it.dateTime = System.currentTimeMillis()
                 this.db.regionsDAO.updateRegion(it)
 
-                val regionLog = saveReionlogInDataBase(it, isInside)
+                val regionLog = saveRegionLogInDataBase(it, isInside)
                 if (WoosmapSettingsCore.modeHighFrequencyLocation || it.didEnter != isInside) {
                     if (woosmapProvider.regionLogReadyListener != null) {
                         woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
                     }
+                    insideGeofencingRegionDataListener?.insideGeofencingRegionData(regionLog,it.didEnter != isInside)
                 }
             }
         }
 
     }
+    interface InsideGeofencingRegionDataListener {
+        fun insideGeofencingRegionData(regionLog: RegionLog, isDidEnterAndInsideEqual: Boolean)
+    }
 
-    protected fun saveReionlogInDataBase(region: Region, isInside: Boolean): RegionLog {
+    private var insideGeofencingRegionDataListener: InsideGeofencingRegionDataListener? = null
+    public fun setInsideGeofencingRegionDataListener(insideGeofencingRegionDataListener: InsideGeofencingRegionDataListener) {
+        this.insideGeofencingRegionDataListener = insideGeofencingRegionDataListener
+    }
+
+    protected fun saveRegionLogInDataBase(region: Region, isInside: Boolean): RegionLog {
         val regionLog = RegionLog()
         regionLog.identifier = region.identifier
         regionLog.dateTime = region.dateTime
@@ -274,7 +283,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         if (temporaryCurrentVisits.isEmpty() && temporaryFinishedVisits.isEmpty()) {
             return
         }
+        detectVisitInZOIClassifiedHelper()
 
+    }
+    protected fun detectVisitInZOIClassifiedHelper(){
         val ZOIsClassified = this.db.zoIsDAO.getWorkHomeZOI()
 
         val lastVisitLocation = Location("lastVisit")
@@ -315,10 +327,18 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 if (woosmapProvider.regionLogReadyListener != null) {
                     woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
                 }
+                visitInZOIClassifiedDataListener?.visitInZOIClassifiedData(regionLog)
 
             }
         }
+    }
+    interface VisitInZOIClassifiedDataListener {
+        fun visitInZOIClassifiedData(regionLog: RegionLog)
+    }
 
+    private var visitInZOIClassifiedDataListener: VisitInZOIClassifiedDataListener? = null
+    public fun setVisitInZOIClassifiedDataListener(visitInZOIClassifiedDataListener: VisitInZOIClassifiedDataListener) {
+        this.visitInZOIClassifiedDataListener = visitInZOIClassifiedDataListener
     }
 
     fun getStoreAPIUrl(lat: Double, lng: Double): String? {
@@ -926,49 +946,59 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         Thread {
             val regionDetected =
                 this.db.regionsDAO.getRegionFromId(geofenceIdentifier) ?: return@Thread
-
-            if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                regionDetected.didEnter = true
-            } else if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                regionDetected.didEnter = false
-            }
-
-            var regionLog = RegionLog()
-            regionLog.identifier = regionDetected.identifier
-            regionLog.dateTime = regionDetected.dateTime
-            regionLog.didEnter = regionDetected.didEnter
-            regionLog.lat = regionDetected.lat
-            regionLog.lng = regionDetected.lng
-            regionLog.idStore = regionDetected.idStore
-            regionLog.radius = regionDetected.radius
-            regionLog.isCurrentPositionInside = regionDetected.isCurrentPositionInside
-
-            if (regionDetected.didEnter) {
-                regionLog.eventName = "woos_geofence_entered_event"
-            } else {
-                regionLog.eventName = "woos_geofence_exited_event"
-            }
-            if (regionDetected.didEnter != regionDetected.isCurrentPositionInside) {
-
-                regionLog.isCurrentPositionInside = regionDetected.didEnter
-                regionDetected.isCurrentPositionInside = regionDetected.didEnter
-
-                this.db.regionLogsDAO.createRegionLog(regionLog)
-
-                regionDetected.dateTime = System.currentTimeMillis()
-                this.db.regionsDAO.updateRegion(regionDetected)
-
-                if (woosmapProvider.regionLogReadyListener != null) {
-                    woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
-                }
-
-            } else {
-                this.db.regionLogsDAO.createRegionLog(regionLog)
-                regionDetected.dateTime = System.currentTimeMillis()
-                this.db.regionsDAO.updateRegion(regionDetected)
-            }
+           didEventRegionHelper(transition,regionDetected)
 
         }.start()
+    }
+    interface EventRegionDataListener {
+        fun eventRegionData(regionDetected: Region, regionLog: RegionLog)
+    }
+    private var eventRegionDataListener: EventRegionDataListener? = null
+    public fun setEventRegionDataListener(eventRegionDataListener: EventRegionDataListener) {
+        this.eventRegionDataListener = eventRegionDataListener
+    }
+
+    protected open fun didEventRegionHelper(transition: Int,regionDetected: Region){
+        if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+            regionDetected.didEnter = true
+        } else if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            regionDetected.didEnter = false
+        }
+
+        var regionLog = RegionLog()
+        regionLog.identifier = regionDetected.identifier
+        regionLog.dateTime = regionDetected.dateTime
+        regionLog.didEnter = regionDetected.didEnter
+        regionLog.lat = regionDetected.lat
+        regionLog.lng = regionDetected.lng
+        regionLog.idStore = regionDetected.idStore
+        regionLog.radius = regionDetected.radius
+        regionLog.isCurrentPositionInside = regionDetected.isCurrentPositionInside
+
+        if (regionDetected.didEnter) {
+            regionLog.eventName = "woos_geofence_entered_event"
+        } else {
+            regionLog.eventName = "woos_geofence_exited_event"
+        }
+        if (regionDetected.didEnter != regionDetected.isCurrentPositionInside) {
+
+            regionLog.isCurrentPositionInside = regionDetected.didEnter
+            regionDetected.isCurrentPositionInside = regionDetected.didEnter
+
+            this.db.regionLogsDAO.createRegionLog(regionLog)
+
+            regionDetected.dateTime = System.currentTimeMillis()
+            this.db.regionsDAO.updateRegion(regionDetected)
+
+            if (woosmapProvider.regionLogReadyListener != null) {
+                woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
+            }
+            eventRegionDataListener?.eventRegionData(regionDetected,regionLog)
+        } else {
+            this.db.regionLogsDAO.createRegionLog(regionLog)
+            regionDetected.dateTime = System.currentTimeMillis()
+            this.db.regionsDAO.updateRegion(regionDetected)
+        }
     }
 
     fun removeGeofence(id: String) {

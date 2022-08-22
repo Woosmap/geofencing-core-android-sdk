@@ -165,14 +165,14 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                     if (woosmapProvider.regionLogReadyListener != null) {
                         woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
                     }
-                    insideGeofencingRegionDataListener?.insideGeofencingRegionData(regionLog,it.didEnter != isInside)
+                    insideGeofencingRegionDataListener?.insideGeofencingRegionData(regionLog,it,isInside,it.didEnter != isInside)
                 }
             }
         }
 
     }
     interface InsideGeofencingRegionDataListener {
-        fun insideGeofencingRegionData(regionLog: RegionLog, isDidEnterAndInsideEqual: Boolean)
+        fun insideGeofencingRegionData(regionLog: RegionLog,region: Region,isInside: Boolean, isDidEnterAndInsideEqual: Boolean)
     }
 
     private var insideGeofencingRegionDataListener: InsideGeofencingRegionDataListener? = null

@@ -181,6 +181,11 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         regionLog.idStore = region.idStore
         regionLog.radius = region.radius
         regionLog.isCurrentPositionInside = isInside
+        if (isInside) {
+            regionLog.eventName = "woos_geofence_entered_event"
+        } else {
+            regionLog.eventName = "woos_geofence_exited_event"
+        }
         this.db.regionLogsDAO.createRegionLog(regionLog)
         return regionLog;
     }
@@ -300,6 +305,11 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 regionLog.lat = lastVisitLocation.latitude
                 regionLog.lng = lastVisitLocation.longitude
                 regionLog.radius = WoosmapSettingsCore.radiusDetectionClassifiedZOI.toDouble()
+                if(didEnter){
+                    regionLog.eventName="woos_zoi_classified_entered_event"
+                }else{
+                    regionLog.eventName="woos_zoi_classified_exited_event"
+                }
                 this.db.regionLogsDAO.createRegionLog(regionLog)
 
                 if (woosmapProvider.regionLogReadyListener != null) {
@@ -933,7 +943,11 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             regionLog.radius = regionDetected.radius
             regionLog.isCurrentPositionInside = regionDetected.isCurrentPositionInside
 
-
+            if (regionDetected.didEnter) {
+                regionLog.eventName = "woos_geofence_entered_event"
+            } else {
+                regionLog.eventName = "woos_geofence_exited_event"
+            }
             if (regionDetected.didEnter != regionDetected.isCurrentPositionInside) {
 
                 regionLog.isCurrentPositionInside = regionDetected.didEnter

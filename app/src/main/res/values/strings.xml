@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">SampleGeofenceCore</string>
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <!--
+        This is the name that users will see when interacting with this channel.
+        It should describe the category of notifications that will be sent through this channel
+     -->
+    <string name="default_notification_channel_name" translatable="true">WoosmapGeofencing</string>
+    <string name="insufficient_permissions">Insufficient permissions.</string>
+    <string name="permission_rationale">Location permission is needed for core functionality</string>
+    <string name="permission_denied_explanation">Permission was denied, but is needed for core
+        functionality.</string>
+    <string name="settings">Settings</string>
+    <string name="Location">Location</string>
+    <string name="POI">POI</string>
+    <string name="visit">Visit</string>
+    <string name="ZOI">ZOI</string>
+</resources>

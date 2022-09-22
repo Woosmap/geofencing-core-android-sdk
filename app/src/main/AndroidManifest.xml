@@ -53,7 +53,7 @@
             android:value="sample://notif" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDpyEMA0LcerlPYmkewAEhDsbTOPrLQZbs"/>
+            android:value=""/>
     </application>
 
 </manifest>

@@ -24,5 +24,5 @@ public class RegionLog {
     public String type = "circle";
     public float expectedAverageSpeed=-1f;
     public String eventName="";
-    public int DurationLog = 0;
+    public long DurationLog = 0;
 }

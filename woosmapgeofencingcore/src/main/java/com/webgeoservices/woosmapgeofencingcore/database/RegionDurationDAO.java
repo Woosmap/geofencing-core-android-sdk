@@ -13,6 +13,6 @@ public interface RegionDurationDAO {
     @Update
     void updateRegionDuration(RegionDuration regionDuration);
 
-    @Query("SELECT * FROM RegionDuration WHERE regionID = :regionID")
-    RegionDuration getRegionDuration(int regionID);
+    @Query("SELECT * FROM RegionDuration WHERE regionIdentifier like :regionIdentifier")
+    RegionDuration getRegionDuration(String regionIdentifier);
 }

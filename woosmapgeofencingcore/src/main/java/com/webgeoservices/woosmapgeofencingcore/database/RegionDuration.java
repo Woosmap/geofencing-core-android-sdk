@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 public class RegionDuration {
     @PrimaryKey(autoGenerate = true)
     public int id;
-    public int regionID;
+    public String regionIdentifier;
     public long entryTime;
     public long exitTime;
 }

@@ -13,7 +13,7 @@ import androidx.room.TypeConverters;
 import com.webgeoservices.woosmapgeofencingcore.FigmmForVisitsCreatorCore;
 import com.webgeoservices.woosmapgeofencingcore.WoosmapSettingsCore;
 
-@Database(entities = {Visit.class, MovingPosition.class, POI.class, ZOI.class, Region.class, RegionLog.class, Distance.class,RegionDuration.class}, version = 37, exportSchema = false)
+@Database(entities = {Visit.class, MovingPosition.class, POI.class, ZOI.class, Region.class, RegionLog.class, Distance.class,RegionDuration.class}, version = 38, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class WoosmapDb extends RoomDatabase {
 

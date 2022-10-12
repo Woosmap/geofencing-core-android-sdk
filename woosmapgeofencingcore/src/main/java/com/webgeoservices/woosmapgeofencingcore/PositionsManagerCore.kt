@@ -211,10 +211,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 val regionDuration = this.db.regionDurationDAO.getRegionDuration(it.identifier)
                 if (regionDuration != null) {
                     regionDuration.exitTime = (System.currentTimeMillis() - regionDuration.entryTime) / 1000 //in sec
-                    it.DurationLog = regionDuration.exitTime
+                    it.spentTime = regionDuration.exitTime
                     this.db.regionDurationDAO.updateRegionDuration(regionDuration)
                 } else {
-                    it.DurationLog = 0
+                    it.spentTime = 0
                 }
             }
         }

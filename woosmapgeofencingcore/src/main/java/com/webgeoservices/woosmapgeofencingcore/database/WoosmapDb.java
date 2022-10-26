@@ -13,7 +13,7 @@ import androidx.room.TypeConverters;
 import com.webgeoservices.woosmapgeofencingcore.FigmmForVisitsCreatorCore;
 import com.webgeoservices.woosmapgeofencingcore.WoosmapSettingsCore;
 
-@Database(entities = {Visit.class, MovingPosition.class, POI.class, ZOI.class, Region.class, RegionLog.class, Distance.class}, version = 33, exportSchema = false)
+@Database(entities = {Visit.class, MovingPosition.class, POI.class, ZOI.class, Region.class, RegionLog.class, Distance.class,RegionDuration.class}, version = 38, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class WoosmapDb extends RoomDatabase {
 
@@ -30,6 +30,8 @@ public abstract class WoosmapDb extends RoomDatabase {
     public abstract RegionLogsPAO getRegionLogsDAO();
 
     public abstract DistancesDAO getDistanceDAO();
+
+    public abstract RegionDurationDAO getRegionDurationDAO();
 
     private static volatile WoosmapDb instance;
 
@@ -66,6 +68,7 @@ public abstract class WoosmapDb extends RoomDatabase {
                 getDistanceDAO().deleteDistanceOlderThan(dateNow - WoosmapSettingsCore.dataDurationDelay);
                 getRegionLogsDAO().deleteRegionLogsOlderThan(dateNow - WoosmapSettingsCore.dataDurationDelay);
                 getRegionsDAO().deleteRegionsOlderThan(dateNow - WoosmapSettingsCore.dataDurationDelay);
+                getRegionDurationDAO().deleteRegionDurationsOlderThan(dateNow - WoosmapSettingsCore.dataDurationDelay);
                 //Update date
                 mPrefs.edit().putLong("lastUpdate", System.currentTimeMillis()).apply();
             }

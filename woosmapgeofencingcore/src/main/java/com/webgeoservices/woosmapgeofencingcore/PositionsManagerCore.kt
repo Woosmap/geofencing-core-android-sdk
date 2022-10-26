@@ -181,7 +181,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     }
 
     protected fun saveRegionLogInDataBase(region: Region, isInside: Boolean): RegionLog {
-        val regionLog = RegionLog()
+        var regionLog = RegionLog()
         regionLog.identifier = region.identifier
         regionLog.dateTime = region.dateTime
         regionLog.didEnter = region.didEnter
@@ -195,8 +195,31 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         } else {
             regionLog.eventName = "woos_geofence_exited_event"
         }
+        regionLog=getRegionLogWithDurationLog(regionLog,isInside)
         this.db.regionLogsDAO.createRegionLog(regionLog)
+        return regionLog
+    }
+    protected fun getRegionLogWithDurationLog(regionLog: RegionLog,isInsideGeofence : Boolean) :RegionLog {
+        regionLog.let {
+            if (isInsideGeofence) {
+                val regionDuration = RegionDuration()
+                regionDuration.regionIdentifier = it.identifier
+                regionDuration.entryTime = System.currentTimeMillis()
+                regionDuration.exitTime=0
+                this.db.regionDurationDAO.createRegionDuration(regionDuration)
+            } else {
+                val regionDuration = this.db.regionDurationDAO.getRegionDuration(it.identifier)
+                if (regionDuration != null) {
+                    regionDuration.exitTime = (System.currentTimeMillis() - regionDuration.entryTime) / 1000 //in sec
+                    it.spentTime = regionDuration.exitTime
+                    this.db.regionDurationDAO.updateRegionDuration(regionDuration)
+                } else {
+                    it.spentTime = 0
+                }
+            }
+        }
         return regionLog;
+
     }
 
     fun distanceBetweenLocationAndPosition(position: MovingPosition, location: Location): Float {
@@ -322,6 +345,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }else{
                     regionLog.eventName="woos_zoi_classified_exited_event"
                 }
+                regionLog=getRegionLogWithDurationLog(regionLog,didEnter)
                 this.db.regionLogsDAO.createRegionLog(regionLog)
 
                 if (woosmapProvider.regionLogReadyListener != null) {
@@ -980,6 +1004,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         } else {
             regionLog.eventName = "woos_geofence_exited_event"
         }
+        regionLog=getRegionLogWithDurationLog(regionLog,regionDetected.didEnter)
         if (regionDetected.didEnter != regionDetected.isCurrentPositionInside) {
 
             regionLog.isCurrentPositionInside = regionDetected.didEnter

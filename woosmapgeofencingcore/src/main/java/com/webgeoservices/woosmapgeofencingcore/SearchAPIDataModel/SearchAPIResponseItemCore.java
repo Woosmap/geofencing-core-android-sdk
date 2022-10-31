@@ -170,7 +170,7 @@ public class SearchAPIResponseItemCore implements Parcelable {
 
             if (properties.has("address")) {
                 addressObject = properties.getJSONObject("address");
-                if(addressObject.has("lines")){
+                if(addressObject.has("lines") && !addressObject.get("lines").toString().equals("null")){
                     addressLineArray = addressObject.getJSONArray("lines");
                     StringBuilder formattedAddress = new StringBuilder();
                     for (int i = 0; i < addressLineArray.length(); i++) {
@@ -179,13 +179,13 @@ public class SearchAPIResponseItemCore implements Parcelable {
                     }
                     detailsResponseItem.formattedAddress = formattedAddress.toString().trim();
                 }
-                if(addressObject.has("city")){
+                if(addressObject.has("city") && !addressObject.get("city").toString().equals("null")){
                     detailsResponseItem.city = addressObject.getString("city");
                 }
-                if(addressObject.has("zipcode")){
+                if(addressObject.has("zipcode") && !addressObject.get("zipcode").toString().equals("null")){
                     detailsResponseItem.zipCode = addressObject.getString("zipcode");
                 }
-                if(addressObject.has("country_code")){
+                if(addressObject.has("country_code") && !addressObject.get("country_code").toString().equals("null")){
                     detailsResponseItem.countryCode = addressObject.getString("country_code");
                 }
             } else {

@@ -156,7 +156,7 @@ public class SearchAPIResponseItemCore implements Parcelable {
      */
     protected static SearchAPIResponseItemCore populateStoreDetail(JSONObject jsonObject) {
         SearchAPIResponseItemCore detailsResponseItem = new SearchAPIResponseItemCore();
-        JSONObject properties;
+        JSONObject properties,addressObject;
         JSONArray addressLineArray;
         try {
             properties = jsonObject.getJSONObject("properties");
@@ -169,16 +169,25 @@ public class SearchAPIResponseItemCore implements Parcelable {
             }
 
             if (properties.has("address")) {
-                addressLineArray = properties.getJSONObject("address").getJSONArray("lines");
-                StringBuilder formattedAddress = new StringBuilder();
-                for (int i = 0; i < addressLineArray.length(); i++) {
-                    if (addressLineArray.getString(i) != "null")
-                        formattedAddress.append(addressLineArray.getString(i));
+                addressObject = properties.getJSONObject("address");
+                if(addressObject.has("lines")){
+                    addressLineArray = addressObject.getJSONArray("lines");
+                    StringBuilder formattedAddress = new StringBuilder();
+                    for (int i = 0; i < addressLineArray.length(); i++) {
+                        if (addressLineArray.getString(i) != "null")
+                            formattedAddress.append(addressLineArray.getString(i));
+                    }
+                    detailsResponseItem.formattedAddress = formattedAddress.toString().trim();
                 }
-                detailsResponseItem.formattedAddress = formattedAddress.toString().trim();
-                detailsResponseItem.city = properties.getJSONObject("address").getString("city");
-                detailsResponseItem.zipCode = properties.getJSONObject("address").getString("zipcode");
-                detailsResponseItem.countryCode = properties.getJSONObject("address").getString("country_code");
+                if(addressObject.has("city")){
+                    detailsResponseItem.city = addressObject.getString("city");
+                }
+                if(addressObject.has("zipcode")){
+                    detailsResponseItem.zipCode = addressObject.getString("zipcode");
+                }
+                if(addressObject.has("country_code")){
+                    detailsResponseItem.countryCode = addressObject.getString("country_code");
+                }
             } else {
                 detailsResponseItem.formattedAddress = properties.getString("name");
             }

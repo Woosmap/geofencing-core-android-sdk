@@ -5,6 +5,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 
 @Dao
@@ -14,6 +15,9 @@ public interface RegionLogsPAO {
 
     @Delete
     void deleteRegion(RegionLog regionLog);
+
+    @Update
+    void updateRegionLog(RegionLog regionLog);
 
     @Query("SELECT * FROM regionLogs ORDER BY dateTime DESC LIMIT 1")
     RegionLog getLastRegionLog();

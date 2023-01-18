@@ -24,6 +24,9 @@ public interface RegionLogsPAO {
     @Query("SELECT * FROM regionLogs WHERE identifier = :identifier")
     RegionLog getRegionLogFromId(String identifier);
 
+    @Query("SELECT * FROM regionLogs WHERE identifier = :identifier ORDER BY dateTime DESC LIMIT 1")
+    RegionLog getLatestRegionLogFromId(String identifier);
+
     @Query("DELETE FROM regionLogs")
     void deleteAllRegionLogs();
 

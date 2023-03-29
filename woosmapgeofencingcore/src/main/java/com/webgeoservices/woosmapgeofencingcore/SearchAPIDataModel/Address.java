@@ -2,7 +2,7 @@ package com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel;
 
 public class Address {
     private Object lines;
-    private String countryCode;
+    private String country_code;
     private String city;
     private String zipcode;
 
@@ -15,11 +15,11 @@ public class Address {
     }
 
     public String getCountryCode() {
-        return countryCode;
+        return country_code;
     }
 
     public void setCountryCode(String value) {
-        this.countryCode = value;
+        this.country_code = value;
     }
 
     public String getCity() {

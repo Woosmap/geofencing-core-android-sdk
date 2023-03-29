@@ -472,40 +472,31 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                     if (!jsonObject.has("error_message")) {
                         var responseObject = Gson().fromJson(jsonObject.toString(), SearchAPI::class.java)
                         for (feature in responseObject.features){
-                            var responseItem = SearchAPIResponseItemCore.fromFeature(feature)
-                        }
-                        val features = jsonObject.getJSONArray("features")
-                        if (features.length() > 0) {
-                            for (i in 0 until features.length()) {
-                                val searchAPIResponseItemCore = SearchAPIResponseItemCore.fromJSON(
-                                    jsonObject.getJSONArray("features").getJSONObject(i)
-                                )
-                                if(searchAPIResponseItemCore != null) {
-                                    val POIaround = POI()
-                                    POIaround.city = searchAPIResponseItemCore.city
-                                    POIaround.zipCode = searchAPIResponseItemCore.zipCode
-                                    POIaround.dateTime = System.currentTimeMillis()
-                                    POIaround.distance = searchAPIResponseItemCore.distance
-                                    POIaround.locationId = positionId
-                                    POIaround.idStore = searchAPIResponseItemCore.idstore
-                                    POIaround.name = searchAPIResponseItemCore.name
-                                    POIaround.lat = searchAPIResponseItemCore.geometry.location.lat
-                                    POIaround.lng = searchAPIResponseItemCore.geometry.location.lng
-                                    POIaround.address = searchAPIResponseItemCore.formattedAddress
-                                    POIaround.contact = searchAPIResponseItemCore.contact
-                                    POIaround.types =
-                                        searchAPIResponseItemCore.types.joinToString(" - ")
-                                    POIaround.tags = searchAPIResponseItemCore.tags.joinToString(" - ")
-                                    POIaround.countryCode = searchAPIResponseItemCore.countryCode
-                                    POIaround.data = response
+                            var searchAPIResponseItemCore = SearchAPIResponseItemCore.fromFeature(feature)
+                            if(searchAPIResponseItemCore != null) {
+                                val POIaround = POI()
+                                POIaround.city = searchAPIResponseItemCore.city
+                                POIaround.zipCode = searchAPIResponseItemCore.zipCode
+                                POIaround.dateTime = System.currentTimeMillis()
+                                POIaround.distance = searchAPIResponseItemCore.distance
+                                POIaround.locationId = positionId
+                                POIaround.idStore = searchAPIResponseItemCore.idstore
+                                POIaround.name = searchAPIResponseItemCore.name
+                                POIaround.lat = searchAPIResponseItemCore.geometry.location.lat
+                                POIaround.lng = searchAPIResponseItemCore.geometry.location.lng
+                                POIaround.address = searchAPIResponseItemCore.formattedAddress
+                                POIaround.contact = searchAPIResponseItemCore.contact
+                                POIaround.types =
+                                    searchAPIResponseItemCore.types.joinToString(" - ")
+                                POIaround.tags = searchAPIResponseItemCore.tags.joinToString(" - ")
+                                POIaround.countryCode = searchAPIResponseItemCore.countryCode
+                                POIaround.data = response
 
-                                    this.db.poIsDAO.createPOI(POIaround)
-                                    if (woosmapProvider.searchAPIReadyListener != null) {
-                                        woosmapProvider.searchAPIReadyListener.SearchAPIReadyCallback(
-                                            POIaround
-                                        )
-                                    }
-
+                                this.db.poIsDAO.createPOI(POIaround)
+                                if (woosmapProvider.searchAPIReadyListener != null) {
+                                    woosmapProvider.searchAPIReadyListener.SearchAPIReadyCallback(
+                                        POIaround
+                                    )
                                 }
                             }
                         }

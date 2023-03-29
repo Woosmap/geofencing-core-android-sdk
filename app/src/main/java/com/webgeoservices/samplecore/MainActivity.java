@@ -322,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
         WoosmapSettingsCore.numberOfDayDataDuration = 30;
 
         // Set Keys
-        WoosmapSettingsCore.privateKeyWoosmapAPI = "74d39650-11f9-49f3-9336-083f9a8604a1";
+        WoosmapSettingsCore.privateKeyWoosmapAPI = "a29ad021-05f3-40fd-9e20-1b5f944bfb06";
         WoosmapSettingsCore.privateKeyGMPStatic = "AIzaSyDpyEMA0LcerlPYmkewAEhDsbTOPrLQZbs";
 
         WoosmapSettingsCore.foregroundLocationServiceEnable = true;

@@ -2,7 +2,10 @@ package com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.room.util.StringUtil;
 
 import com.google.gson.Gson;
 import com.webgeoservices.woosmapgeofencingcore.WoosmapSettingsCore;
@@ -11,7 +14,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.StringJoiner;
 
 
 /***
@@ -156,10 +162,48 @@ public class SearchAPIResponseItemCore implements Parcelable {
         SearchAPIResponseItemCore detailsResponseItem = null;
         try{
             Properties properties = feature.getProperties();
+            Gson gson = new Gson();
             detailsResponseItem = new SearchAPIResponseItemCore();
-            detailsResponseItem.contact = properties.getContact().toString();
+            detailsResponseItem.contact = gson.toJson(properties.getContact());
             detailsResponseItem.idstore = properties.getStoreID();
             detailsResponseItem.distance = properties.getDistance();
+            if (properties.getOpen()!=null && properties.getOpen().containsKey("open_now")){
+                detailsResponseItem.openNow = (Boolean) properties.getOpen().get("open_now");
+            }
+            if (properties.getAddress().getLines()!=null){
+                ArrayList<String> lines = (ArrayList<String>)properties.getAddress().getLines();
+                detailsResponseItem.formattedAddress =  TextUtils.join(" ", lines);
+            }
+            else{
+                detailsResponseItem.formattedAddress = properties.getName();
+            }
+            detailsResponseItem.city = properties.getAddress().getCity();
+            detailsResponseItem.zipCode = properties.getAddress().getZipcode();
+            detailsResponseItem.countryCode = properties.getAddress().getCountryCode();
+
+            String[] stringArray = Arrays.copyOf(properties.getTypes(), properties.getTypes().length, String[].class);
+            detailsResponseItem.types = stringArray;
+            stringArray = Arrays.copyOf(properties.getTags(), properties.getTags().length, String[].class);
+            detailsResponseItem.tags = stringArray;
+            detailsResponseItem.item = new JSONObject(gson.toJson(feature));
+            detailsResponseItem.name = properties.getName();
+            HashMap<String, Object> userProperties = new HashMap<>();
+            if (properties.getUserProperties()!=null){
+                for (String key: properties.getUserProperties().keySet()){
+                    Object object = properties.getUserProperties().get(key);
+                    userProperties.put(key, object);
+                }
+            }
+            detailsResponseItem.userProperties = userProperties;
+
+            Geometry geometryDetail = new Geometry();
+            geometryDetail.setLocation(new Location(
+                    feature.getGeometry().getCoordinates()[1],
+                    feature.getGeometry().getCoordinates()[0]
+            ));
+            geometryDetail.setCoordinates(feature.getGeometry().getCoordinates());
+            geometryDetail.setType(feature.getGeometry().getType());
+            detailsResponseItem.geometry = geometryDetail;
         }
         catch (Exception ex){
             Log.e(TAG, ex.getMessage(), ex);

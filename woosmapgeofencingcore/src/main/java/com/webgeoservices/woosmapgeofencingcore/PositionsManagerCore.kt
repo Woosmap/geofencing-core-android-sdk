@@ -15,6 +15,7 @@ import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.gson.Gson
 import com.webgeoservices.woosmapgeofencingcore.DistanceAPIDataModel.DistanceAPI
+import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPIResponseItemCore
 import com.webgeoservices.woosmapgeofencingcore.database.*
 import org.json.JSONObject
@@ -469,6 +470,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                     assert(response != null)
                     val jsonObject = JSONObject(response.toString())
                     if (!jsonObject.has("error_message")) {
+                        var responseObject = Gson().fromJson(jsonObject.toString(), SearchAPI::class.java)
+                        for (feature in responseObject.features){
+                            var responseItem = SearchAPIResponseItemCore.fromFeature(feature)
+                        }
                         val features = jsonObject.getJSONArray("features")
                         if (features.length() > 0) {
                             for (i in 0 until features.length()) {

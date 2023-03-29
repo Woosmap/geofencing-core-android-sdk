@@ -148,6 +148,26 @@ public class SearchAPIResponseItemCore implements Parcelable {
         return populateStoreDetail(jsonObject);
     }
 
+    public static SearchAPIResponseItemCore fromFeature(Feature feature){
+        return populateStoreDetail(feature);
+    }
+
+    protected static SearchAPIResponseItemCore populateStoreDetail(Feature feature){
+        SearchAPIResponseItemCore detailsResponseItem = null;
+        try{
+            Properties properties = feature.getProperties();
+            detailsResponseItem = new SearchAPIResponseItemCore();
+            detailsResponseItem.contact = properties.getContact().toString();
+            detailsResponseItem.idstore = properties.getStoreID();
+            detailsResponseItem.distance = properties.getDistance();
+        }
+        catch (Exception ex){
+            Log.e(TAG, ex.getMessage(), ex);
+            return null;
+        }
+        return detailsResponseItem;
+    }
+
 
     /***
      * Creates and returns <code>SearchAPIResponseItemCore</code> object from the response returned by <code>store</code> API

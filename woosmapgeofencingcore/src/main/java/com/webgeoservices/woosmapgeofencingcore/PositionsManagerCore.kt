@@ -14,6 +14,7 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.gson.Gson
+import com.google.gson.internal.LinkedTreeMap
 import com.webgeoservices.woosmapgeofencingcore.DistanceAPIDataModel.DistanceAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPIResponseItemCore
@@ -468,9 +469,9 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             { response ->
                 Thread {
                     assert(response != null)
-                    val jsonObject = JSONObject(response.toString())
-                    if (!jsonObject.has("error_message")) {
-                        var responseObject = Gson().fromJson(jsonObject.toString(), SearchAPI::class.java)
+                    val gsonObject = Gson().fromJson(response.toString(), Object::class.java)
+                    if (!(gsonObject as LinkedTreeMap<String, Object>).containsKey("error_message")) {
+                        var responseObject = Gson().fromJson(response.toString(), SearchAPI::class.java)
                         for (feature in responseObject.features){
                             var searchAPIResponseItemCore = SearchAPIResponseItemCore.fromFeature(feature)
                             if(searchAPIResponseItemCore != null) {
@@ -508,15 +509,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             })
         requestQueue?.add(req)
     }
-
-    /*interface SearchApiResponseListener {
-        fun searchApiData(searchApiData: SearchAPIResponseItemCore, POIaround: POI)
-    }
-
-    private var searchApiResponseListener: SearchApiResponseListener? = null
-    public fun setSearchApiResponseListener(searchApiResponseListener: SearchApiResponseListener) {
-        this.searchApiResponseListener = searchApiResponseListener
-    }*/
 
     fun calculateDistance(
         latOrigin: Double,

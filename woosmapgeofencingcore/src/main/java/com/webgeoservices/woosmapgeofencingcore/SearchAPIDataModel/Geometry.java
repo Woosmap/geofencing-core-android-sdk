@@ -8,24 +8,7 @@ import android.os.Parcelable;
  * Represents geometry of the <code>DetailsResponseItem</code> object in terms of latitude, longitude and viewport (if available)
  */
 public class Geometry implements Parcelable {
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     private String type;
-
-    public Double[] getCoordinates() {
-        return coordinates;
-    }
-
-    public void setCoordinates(Double[] coordinates) {
-        this.coordinates = coordinates;
-    }
-
     private Double[] coordinates;
     private Location location;
     /***
@@ -79,5 +62,29 @@ public class Geometry implements Parcelable {
     protected void setLocation(Location location) {
         this.location = location;
     }
+
+    /***
+     * Returns the type of the geometry. In this case it will always be Point?
+     * @return
+     */
+    public String getType() { return type;}
+
+    /***
+     * Sets geometry type
+     * @param type
+     */
+    public void setType(String type) { this.type = type;}
+
+    /***
+     * Gets the coordinates of the geometry
+     * @return
+     */
+    public Double[] getCoordinates() { return coordinates; }
+
+    /***
+     * Sets the coordinates of the geometry
+     * @param coordinates
+     */
+    public void setCoordinates(Double[] coordinates) { this.coordinates = coordinates; }
 
 }

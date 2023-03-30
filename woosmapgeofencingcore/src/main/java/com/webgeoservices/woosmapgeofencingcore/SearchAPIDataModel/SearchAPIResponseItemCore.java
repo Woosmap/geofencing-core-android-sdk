@@ -158,6 +158,11 @@ public class SearchAPIResponseItemCore implements Parcelable {
         return populateStoreDetail(feature);
     }
 
+    /***
+     * Static mathod which constructs and returns a new <code>SearchAPIResponseItemCore</code> object from `Feature` object
+     * @param feature - `Feature` object returned from the API
+     * @return <code>SearchAPIResponseItemCore</code> object
+     */
     protected static SearchAPIResponseItemCore populateStoreDetail(Feature feature){
         SearchAPIResponseItemCore detailsResponseItem = null;
         try{

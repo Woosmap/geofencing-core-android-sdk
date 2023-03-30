@@ -14,7 +14,9 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.gson.Gson
+import com.google.gson.internal.LinkedTreeMap
 import com.webgeoservices.woosmapgeofencingcore.DistanceAPIDataModel.DistanceAPI
+import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPIResponseItemCore
 import com.webgeoservices.woosmapgeofencingcore.database.*
 import org.json.JSONObject
@@ -467,40 +469,35 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             { response ->
                 Thread {
                     assert(response != null)
-                    val jsonObject = JSONObject(response.toString())
-                    if (!jsonObject.has("error_message")) {
-                        val features = jsonObject.getJSONArray("features")
-                        if (features.length() > 0) {
-                            for (i in 0 until features.length()) {
-                                val searchAPIResponseItemCore = SearchAPIResponseItemCore.fromJSON(
-                                    jsonObject.getJSONArray("features").getJSONObject(i)
-                                )
-                                if(searchAPIResponseItemCore != null) {
-                                    val POIaround = POI()
-                                    POIaround.city = searchAPIResponseItemCore.city
-                                    POIaround.zipCode = searchAPIResponseItemCore.zipCode
-                                    POIaround.dateTime = System.currentTimeMillis()
-                                    POIaround.distance = searchAPIResponseItemCore.distance
-                                    POIaround.locationId = positionId
-                                    POIaround.idStore = searchAPIResponseItemCore.idstore
-                                    POIaround.name = searchAPIResponseItemCore.name
-                                    POIaround.lat = searchAPIResponseItemCore.geometry.location.lat
-                                    POIaround.lng = searchAPIResponseItemCore.geometry.location.lng
-                                    POIaround.address = searchAPIResponseItemCore.formattedAddress
-                                    POIaround.contact = searchAPIResponseItemCore.contact
-                                    POIaround.types =
-                                        searchAPIResponseItemCore.types.joinToString(" - ")
-                                    POIaround.tags = searchAPIResponseItemCore.tags.joinToString(" - ")
-                                    POIaround.countryCode = searchAPIResponseItemCore.countryCode
-                                    POIaround.data = response
+                    val gsonObject = Gson().fromJson(response.toString(), Object::class.java)
+                    if (!(gsonObject as LinkedTreeMap<String, Object>).containsKey("error_message")) {
+                        var responseObject = Gson().fromJson(response.toString(), SearchAPI::class.java)
+                        for (feature in responseObject.features){
+                            var searchAPIResponseItemCore = SearchAPIResponseItemCore.fromFeature(feature)
+                            if(searchAPIResponseItemCore != null) {
+                                val POIaround = POI()
+                                POIaround.city = searchAPIResponseItemCore.city
+                                POIaround.zipCode = searchAPIResponseItemCore.zipCode
+                                POIaround.dateTime = System.currentTimeMillis()
+                                POIaround.distance = searchAPIResponseItemCore.distance
+                                POIaround.locationId = positionId
+                                POIaround.idStore = searchAPIResponseItemCore.idstore
+                                POIaround.name = searchAPIResponseItemCore.name
+                                POIaround.lat = searchAPIResponseItemCore.geometry.location.lat
+                                POIaround.lng = searchAPIResponseItemCore.geometry.location.lng
+                                POIaround.address = searchAPIResponseItemCore.formattedAddress
+                                POIaround.contact = searchAPIResponseItemCore.contact
+                                POIaround.types =
+                                    searchAPIResponseItemCore.types.joinToString(" - ")
+                                POIaround.tags = searchAPIResponseItemCore.tags.joinToString(" - ")
+                                POIaround.countryCode = searchAPIResponseItemCore.countryCode
+                                POIaround.data = response
 
-                                    this.db.poIsDAO.createPOI(POIaround)
-                                    if (woosmapProvider.searchAPIReadyListener != null) {
-                                        woosmapProvider.searchAPIReadyListener.SearchAPIReadyCallback(
-                                            POIaround
-                                        )
-                                    }
-
+                                this.db.poIsDAO.createPOI(POIaround)
+                                if (woosmapProvider.searchAPIReadyListener != null) {
+                                    woosmapProvider.searchAPIReadyListener.SearchAPIReadyCallback(
+                                        POIaround
+                                    )
                                 }
                             }
                         }
@@ -512,15 +509,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             })
         requestQueue?.add(req)
     }
-
-    /*interface SearchApiResponseListener {
-        fun searchApiData(searchApiData: SearchAPIResponseItemCore, POIaround: POI)
-    }
-
-    private var searchApiResponseListener: SearchApiResponseListener? = null
-    public fun setSearchApiResponseListener(searchApiResponseListener: SearchApiResponseListener) {
-        this.searchApiResponseListener = searchApiResponseListener
-    }*/
 
     fun calculateDistance(
         latOrigin: Double,

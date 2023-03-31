@@ -413,7 +413,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             destination,
             WoosmapSettingsCore.privateKeyWoosmapAPI
         )
-        val req = APIHelper.getInstance(context).createGetReuqest(
+        val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
                 Thread {
@@ -462,7 +462,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         }
 
         val url = getStoreAPIUrl(lat, lng)
-        val req = APIHelper.getInstance(context).createGetReuqest(
+        val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
                 Thread {
@@ -619,7 +619,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 WoosmapSettingsCore.privateKeyWoosmapAPI
             )
         }
-        val req = APIHelper.getInstance(context).createGetReuqest(
+        val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
                 Thread {
@@ -812,7 +812,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             locationId,
             parameters
         )
-        var req = APIHelper.getInstance(context).createGetReuqest(
+        var req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
                 Thread {

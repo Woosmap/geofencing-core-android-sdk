@@ -7,27 +7,29 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
+
 import java.util.Map;
+
 import javax.annotation.Nullable;
 
-public class APIHelper {
+public class APIHelperCore {
     private Context context;
-    private static APIHelper _instance;
+    private static APIHelperCore _instance;
 
-    protected APIHelper(Context context){
+    protected APIHelperCore(Context context){
         this.context = context;
     }
 
-    protected static APIHelper getInstance(Context context){
+    protected static APIHelperCore getInstance(Context context){
         if (_instance == null){
-            _instance = new APIHelper(context);
+            _instance = new APIHelperCore(context);
         }
         return _instance;
     }
 
     protected StringRequest createGetReuqest(String url,
-                                  Response.Listener<String> listener,
-                                  @Nullable Response.ErrorListener errorListener){
+                                             Response.Listener<String> listener,
+                                             @Nullable Response.ErrorListener errorListener){
         StringRequest stringRequest;
         stringRequest = new StringRequest(Request.Method.GET, url,listener, errorListener){
             @Override

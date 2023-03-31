@@ -292,7 +292,7 @@ public class WoosmapMessageBuilderMapsCore {
     private void searchAPIRequest(final Location location, final boolean withGoogleMapStatic) {
         final RequestQueue requestQueue = Volley.newRequestQueue(context);
         String urlAPI = getStoreAPIUrl(location.getLatitude(), location.getLongitude());
-        StringRequest stringRequest = APIHelper.getInstance(context).createGetReuqest(
+        StringRequest stringRequest = APIHelperCore.getInstance(context).createGetReuqest(
             urlAPI,
             response -> {
                 Gson gson = new Gson();

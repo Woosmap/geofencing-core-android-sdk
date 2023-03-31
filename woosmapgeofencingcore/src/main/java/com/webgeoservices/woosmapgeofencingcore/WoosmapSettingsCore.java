@@ -370,7 +370,7 @@ public class WoosmapSettingsCore {
         if (!GeofencingSDKVersion.isEmpty()){
             return GeofencingSDKVersion;
         }
-        return context.getString(R.string.core_sdk_version);
+        return BuildConfig.CORE_SDK_VERSION;
     }
 
 }

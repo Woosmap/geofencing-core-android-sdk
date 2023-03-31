@@ -6,9 +6,7 @@ import android.content.Context
 import android.location.Location
 import android.util.Log
 import android.util.Pair
-import com.android.volley.Request
 import com.android.volley.RequestQueue
-import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
@@ -19,7 +17,6 @@ import com.webgeoservices.woosmapgeofencingcore.DistanceAPIDataModel.DistanceAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPIResponseItemCore
 import com.webgeoservices.woosmapgeofencingcore.database.*
-import org.json.JSONObject
 import java.util.*
 
 open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider: WoosmapProvider) {
@@ -443,32 +440,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
             }
         )
-//        val req = StringRequest(
-//            Request.Method.GET, url,
-//            { response ->
-//                Thread {
-//                    val gson = Gson()
-//                    val data = gson.fromJson(response, DistanceAPI::class.java)
-//                    val status = data.status
-//
-//                    if (status == "OK") {
-//                        if (data.rows.get(0).elements.get(0).status == "OK") {
-//                            POIaround.travelingDistance =
-//                                data.rows.get(0).elements.get(0).distance.text
-//                            POIaround.duration = data.rows[0].elements[0].duration.text
-//                        }
-//                    }
-//
-//                    this.db.poIsDAO.createPOI(POIaround)
-//                    if (woosmapProvider.searchAPIReadyListener != null) {
-//                        woosmapProvider.searchAPIReadyListener.SearchAPIReadyCallback(POIaround)
-//                    }
-//                    requestDistanceApiResponseListener?.requestDistanceApiData(data, POIaround)
-//                }.start()
-//            },
-//            { error ->
-//                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
-//            })
         requestQueue?.add(req)
     }
 
@@ -535,49 +506,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " search API")
             }
         )
-//        val req = StringRequest(
-//            Request.Method.GET, url,
-//            { response ->
-//                Thread {
-//                    assert(response != null)
-//                    val gsonObject = Gson().fromJson(response.toString(), Object::class.java)
-//                    if (!(gsonObject as LinkedTreeMap<String, Object>).containsKey("error_message")) {
-//                        var responseObject = Gson().fromJson(response.toString(), SearchAPI::class.java)
-//                        for (feature in responseObject.features){
-//                            var searchAPIResponseItemCore = SearchAPIResponseItemCore.fromFeature(feature)
-//                            if(searchAPIResponseItemCore != null) {
-//                                val POIaround = POI()
-//                                POIaround.city = searchAPIResponseItemCore.city
-//                                POIaround.zipCode = searchAPIResponseItemCore.zipCode
-//                                POIaround.dateTime = System.currentTimeMillis()
-//                                POIaround.distance = searchAPIResponseItemCore.distance
-//                                POIaround.locationId = positionId
-//                                POIaround.idStore = searchAPIResponseItemCore.idstore
-//                                POIaround.name = searchAPIResponseItemCore.name
-//                                POIaround.lat = searchAPIResponseItemCore.geometry.location.lat
-//                                POIaround.lng = searchAPIResponseItemCore.geometry.location.lng
-//                                POIaround.address = searchAPIResponseItemCore.formattedAddress
-//                                POIaround.contact = searchAPIResponseItemCore.contact
-//                                POIaround.types =
-//                                    searchAPIResponseItemCore.types.joinToString(" - ")
-//                                POIaround.tags = searchAPIResponseItemCore.tags.joinToString(" - ")
-//                                POIaround.countryCode = searchAPIResponseItemCore.countryCode
-//                                POIaround.data = response
-//
-//                                this.db.poIsDAO.createPOI(POIaround)
-//                                if (woosmapProvider.searchAPIReadyListener != null) {
-//                                    woosmapProvider.searchAPIReadyListener.SearchAPIReadyCallback(
-//                                        POIaround
-//                                    )
-//                                }
-//                            }
-//                        }
-//                    }
-//                }.start()
-//            },
-//            { error ->
-//                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " search API")
-//            })
         requestQueue?.add(req)
     }
 
@@ -753,67 +681,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
             }
         )
-//        val req = StringRequest(
-//            Request.Method.GET, url,
-//            { response ->
-//                Thread {
-//                    val gson = Gson()
-//                    val data = gson.fromJson(response, DistanceAPI::class.java)
-//                    val status = data.status
-//                    if (status.contains("OK")) {
-//                        var distancesList: MutableList<Distance> = mutableListOf<Distance>()
-//                        for (row in data.rows) {
-//                            for (element in row.elements) {
-//                                if (element.status.contains("OK")) {
-//                                    val distance = Distance()
-//                                    distance.locationId = locationId
-//                                    distance.dateTime = System.currentTimeMillis()
-//                                    distance.originLatitude = latOrigin
-//                                    distance.originLongitude = lngOrigin
-//                                    distance.distance = element.distance.value
-//                                    distance.distanceText = element.distance.text
-//                                    distance.duration = element.duration.value
-//                                    distance.durationText = element.duration.text
-//                                    distance.routing = WoosmapSettingsCore.trafficDistanceRouting
-//                                    distance.mode = mode
-//                                    distance.units = units
-//                                    distance.language = language
-//                                    val dest = listPosition.get(row.elements.indexOf(element))
-//                                    distance.destinationLatitude = dest.first
-//                                    distance.destinationLongitude = dest.second
-//                                    this.db.distanceDAO.createDistance(distance)
-//                                    distancesList.add(distance)
-//                                }
-//                            }
-//                        }
-//                        if (woosmapProvider.distanceReadyListener != null) {
-//                            woosmapProvider.distanceReadyListener.DistanceReadyCallback(
-//                                distancesList.toTypedArray()
-//                            )
-//                        }
-//                        distanceApiResponseListener?.distanceApiData(data, distancesList)
-//
-//                    } else {
-//                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Distance API " + status)
-//                    }
-//                    if (locationId != 0 && status.contains("OK") && data.rows.get(0).elements.get(0).status.contains(
-//                            "OK"
-//                        )
-//                    ) {
-//                        var poiToUpdate = this.db.poIsDAO.getPOIbyLocationID(locationId)
-//                        if (poiToUpdate != null) {
-//                            poiToUpdate.travelingDistance =
-//                                data.rows.get(0).elements.get(0).distance.text
-//                            poiToUpdate.duration = data.rows.get(0).elements.get(0).duration.text
-//                            this.db.poIsDAO.updatePOI(poiToUpdate)
-//                        }
-//                    }
-//
-//                }.start()
-//            },
-//            { error ->
-//                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
-//            })
         requestQueue?.add(req)
     }
 
@@ -978,38 +845,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
             }
         )
-//        val req = StringRequest(
-//            Request.Method.GET, url,
-//            { response ->
-//                Thread {
-//                    val gson = Gson()
-//                    val data = gson.fromJson(response, DistanceAPI::class.java)
-//                    val status = data.status
-//                    if (status.contains("OK")) {
-//                        val distancesList = getDistanceListFromDistanceApiData(
-//                            data,
-//                            latOrigin,
-//                            lngOrigin,
-//                            listPosition,
-//                            locationId
-//                        )
-//                        if (woosmapProvider.distanceReadyListener != null) {
-//                            woosmapProvider.distanceReadyListener.DistanceReadyCallback(
-//                                distancesList.toTypedArray()
-//                            )
-//                        }
-//                        trafficApiResponseListener?.trafficApiData(data, distancesList)
-//
-//                    } else {
-//                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Distance API " + status)
-//                    }
-//                    updatePoiFromTrafficAPI(locationId, status, data)
-//
-//                }.start()
-//            },
-//            { error ->
-//                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
-//            })
         requestQueue?.add(req)
     }
 

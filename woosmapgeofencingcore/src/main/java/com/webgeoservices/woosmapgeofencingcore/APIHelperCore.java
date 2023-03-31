@@ -39,7 +39,7 @@ public class APIHelperCore {
                 headers.put("X-Android-Identifier", context.getPackageName());
                 headers.put("X-SDK-Source", "geofence-sdk");
                 headers.put("X-AK-SDK-Platform", "Android");
-                headers.put("X-AK-SDK-Version", WoosmapSettingsCore.getGeofencingSDKVersion(context));
+                headers.put("X-AK-SDK-Version", WoosmapSettingsCore.getGeofencingSDKVersion());
                 return headers;
             }
         };

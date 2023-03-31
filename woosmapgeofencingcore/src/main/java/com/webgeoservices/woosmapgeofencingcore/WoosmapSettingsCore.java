@@ -366,7 +366,7 @@ public class WoosmapSettingsCore {
     }
 
     protected static String GeofencingSDKVersion = "";
-    protected static String getGeofencingSDKVersion(Context context){
+    protected static String getGeofencingSDKVersion(){
         if (!GeofencingSDKVersion.isEmpty()){
             return GeofencingSDKVersion;
         }

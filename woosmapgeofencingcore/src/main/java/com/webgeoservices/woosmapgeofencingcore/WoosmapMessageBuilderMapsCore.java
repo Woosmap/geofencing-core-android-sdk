@@ -292,9 +292,9 @@ public class WoosmapMessageBuilderMapsCore {
     private void searchAPIRequest(final Location location, final boolean withGoogleMapStatic) {
         final RequestQueue requestQueue = Volley.newRequestQueue(context);
         String urlAPI = getStoreAPIUrl(location.getLatitude(), location.getLongitude());
-        StringRequest stringRequest = new StringRequest(urlAPI, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
+        StringRequest stringRequest = APIHelperCore.getInstance(context).createGetReuqest(
+            urlAPI,
+            response -> {
                 Gson gson = new Gson();
                 SearchAPI data = gson.fromJson(response, SearchAPI.class);
                 Feature featureSearch = data.getFeatures()[0];
@@ -319,16 +319,13 @@ public class WoosmapMessageBuilderMapsCore {
                     Notification notification = mBuilder.build();
                     mNotificationManager.notify(new Random().nextInt(20), notification);
                 }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+            },
+            error -> {
                 // Error request
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " search API");
                 sendErrorNotification(context, "Search API : " + error.toString());
             }
-        });
+        );
         requestQueue.add(stringRequest);
     }
 

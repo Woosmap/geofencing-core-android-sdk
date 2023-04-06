@@ -6,9 +6,7 @@ import android.content.Context
 import android.location.Location
 import android.util.Log
 import android.util.Pair
-import com.android.volley.Request
 import com.android.volley.RequestQueue
-import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
@@ -19,7 +17,6 @@ import com.webgeoservices.woosmapgeofencingcore.DistanceAPIDataModel.DistanceAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPIResponseItemCore
 import com.webgeoservices.woosmapgeofencingcore.database.*
-import org.json.JSONObject
 import java.util.*
 
 open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider: WoosmapProvider) {
@@ -416,8 +413,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             destination,
             WoosmapSettingsCore.privateKeyWoosmapAPI
         )
-        val req = StringRequest(
-            Request.Method.GET, url,
+        val req = APIHelperCore.getInstance(context).createGetReuqest(
+            url,
             { response ->
                 Thread {
                     val gson = Gson()
@@ -441,7 +438,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             },
             { error ->
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
-            })
+            }
+        )
         requestQueue?.add(req)
     }
 
@@ -464,8 +462,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         }
 
         val url = getStoreAPIUrl(lat, lng)
-        val req = StringRequest(
-            Request.Method.GET, url,
+        val req = APIHelperCore.getInstance(context).createGetReuqest(
+            url,
             { response ->
                 Thread {
                     assert(response != null)
@@ -506,7 +504,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             },
             { error ->
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " search API")
-            })
+            }
+        )
         requestQueue?.add(req)
     }
 
@@ -620,8 +619,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 WoosmapSettingsCore.privateKeyWoosmapAPI
             )
         }
-        val req = StringRequest(
-            Request.Method.GET, url,
+        val req = APIHelperCore.getInstance(context).createGetReuqest(
+            url,
             { response ->
                 Thread {
                     val gson = Gson()
@@ -680,7 +679,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             },
             { error ->
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
-            })
+            }
+        )
         requestQueue?.add(req)
     }
 
@@ -812,8 +812,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             locationId,
             parameters
         )
-        val req = StringRequest(
-            Request.Method.GET, url,
+        var req = APIHelperCore.getInstance(context).createGetReuqest(
+            url,
             { response ->
                 Thread {
                     val gson = Gson()
@@ -843,7 +843,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             },
             { error ->
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
-            })
+            }
+        )
         requestQueue?.add(req)
     }
 

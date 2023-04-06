@@ -365,4 +365,12 @@ public class WoosmapSettingsCore {
         }
     }
 
+    protected static String GeofencingSDKVersion = "";
+    protected static String getGeofencingSDKVersion(){
+        if (!GeofencingSDKVersion.isEmpty()){
+            return GeofencingSDKVersion;
+        }
+        return BuildConfig.CORE_SDK_VERSION;
+    }
+
 }

@@ -524,13 +524,15 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         locationId: Int = 0
     ) {
         if (WoosmapSettingsCore.distanceProvider == WoosmapSettingsCore.woosmapDistance) {
-            distanceAPI(latOrigin, lngOrigin, listPosition, locationId)
+            distanceAPI(latOrigin, lngOrigin, listPosition, locationId, false)
         } else {
-            trafficDistanceAPI(
+            Log.w(WoosmapSettingsCore.WoosmapSdkTag, "Woosmap Traffic API has been deprecated. You are being redirected to Woosmap Distance API.")
+            distanceAPI(
                 latOrigin,
                 lngOrigin,
                 listPosition,
                 locationId,
+                true
             )
         }
     }
@@ -548,13 +550,15 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         }
 
         if (provider == WoosmapSettingsCore.woosmapDistance) {
-            distanceAPI(latOrigin, lngOrigin, listPosition, locationId, parameters)
+            distanceAPI(latOrigin, lngOrigin, listPosition, locationId, false, parameters)
         } else {
-            trafficDistanceAPI(
+            Log.w(WoosmapSettingsCore.WoosmapSdkTag, "Woosmap Traffic API has been deprecated. You are being redirected to Woosmap Distance API.")
+            distanceAPI(
                 latOrigin,
                 lngOrigin,
                 listPosition,
                 locationId,
+                true,
                 parameters
             )
         }
@@ -566,8 +570,13 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         lngOrigin: Double,
         listPosition: MutableList<Pair<Double, Double>>,
         locationId: Int = 0,
+        considerTrafic: Boolean = false,
         parameters: Map<String, String> = emptyMap(),
     ) {
+        var requestUrl = WoosmapSettingsCore.DistanceAPIUrl
+        if (considerTrafic){
+            requestUrl = WoosmapSettingsCore.DistanceAPIWithTrafficUrl
+        }
         if (requestQueue == null) {
             requestQueue = Volley.newRequestQueue(this.context)
         }
@@ -587,7 +596,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         var language = WoosmapSettingsCore.distanceLanguage
         if (parameters.isEmpty()) {
             url = String.format(
-                WoosmapSettingsCore.DistanceAPIUrl,
+                requestUrl,
                 WoosmapSettingsCore.WoosmapURL,
                 WoosmapSettingsCore.distanceMode,
                 WoosmapSettingsCore.getDistanceUnits(),
@@ -608,7 +617,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 language = parameters["distanceLanguage"]
             }
             url = String.format(
-                WoosmapSettingsCore.DistanceAPIUrl,
+                requestUrl,
                 WoosmapSettingsCore.WoosmapURL,
                 mode,
                 units,

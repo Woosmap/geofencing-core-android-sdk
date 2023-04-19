@@ -97,6 +97,7 @@ public class WoosmapSettingsCore {
         WoosmapSettingsCore.distanceMaxAirDistanceFilter = mPrefs.getInt("distanceMaxAirDistanceFilter", WoosmapSettingsCore.distanceMaxAirDistanceFilter);
         WoosmapSettingsCore.distanceAPIEnable = mPrefs.getBoolean("distanceAPIEnable", WoosmapSettingsCore.distanceAPIEnable);
         WoosmapSettingsCore.trafficDistanceRouting = mPrefs.getString("trafficDistanceRouting", WoosmapSettingsCore.trafficDistanceRouting);
+        WoosmapSettingsCore.trafficDistanceMethod = mPrefs.getString("trafficDistanceMethod", WoosmapSettingsCore.trafficDistanceMethod);
         WoosmapSettingsCore.distanceProvider = mPrefs.getString("distanceProvider", WoosmapSettingsCore.distanceProvider);
         WoosmapSettingsCore.distanceUnits = mPrefs.getString("distanceUnits", WoosmapSettingsCore.distanceUnits);
         WoosmapSettingsCore.distanceLanguage = mPrefs.getString("distanceLanguage", WoosmapSettingsCore.distanceLanguage);
@@ -210,6 +211,11 @@ public class WoosmapSettingsCore {
     private static final String balanced = "balanced";
     static public String trafficDistanceRouting = fastest;
 
+    //Disatnce method
+    private static final String time = "time";
+    private static final String distance = "distance";
+    static public String trafficDistanceMethod = time;
+
     //Distance Language
     static public String distanceLanguage = "en";
 
@@ -240,6 +246,14 @@ public class WoosmapSettingsCore {
             WoosmapSettingsCore.trafficDistanceRouting = trafficDistanceRouting;
         } else {
             WoosmapSettingsCore.trafficDistanceRouting = fastest;
+        }
+    }
+
+    public static void setTrafficDistanceMethod(String trafficDistanceMethod) {
+        if (trafficDistanceMethod.equals(time) || trafficDistanceMethod.equals(distance)) {
+            WoosmapSettingsCore.trafficDistanceMethod = trafficDistanceMethod;
+        } else {
+            WoosmapSettingsCore.trafficDistanceMethod = time;
         }
     }
 
@@ -325,8 +339,8 @@ public class WoosmapSettingsCore {
 
     public static String WoosmapURL = "https://api.woosmap.com";
     public static String SearchAPIUrl = "%s/stores/search/?private_key=%s&lat=%s&lng=%s&stores_by_page=20";
-    public static String DistanceAPIUrl = "%s/distance/distancematrix/json?mode=%s&units=%s&language=%s&origins=%s,%s&destinations=%s&private_key=%s&elements=duration_distance";
-    public static String DistanceAPIWithTrafficUrl = "%s/distance/distancematrix/json?mode=%s&units=%s&language=%s&origins=%s,%s&destinations=%s&private_key=%s&departure_time=now&elements=duration_distance";
+    public static String DistanceAPIUrl = "%s/distance/distancematrix/json?mode=%s&units=%s&language=%s&origins=%s,%s&destinations=%s&private_key=%s&method=%s&elements=duration_distance";
+    public static String DistanceAPIWithTrafficUrl = "%s/distance/distancematrix/json?mode=%s&units=%s&language=%s&origins=%s,%s&destinations=%s&private_key=%s&method=%s&departure_time=now&elements=duration_distance";
     public static String TrafficDistanceAPIUrl = "%s/traffic/distancematrix/json?mode=%s&units=%s&language=%s&routing=%s&origins=%s,%s&destinations=%s&private_key=%s";
     public static String GoogleMapStaticUrl = "https://maps.google.com/maps/api/staticmap?markers=color:red%%7C%s,%s&markers=color:blue%%7C%s,%s&zoom=14&size=400x400&sensor=true&key=%s";
     public static String GoogleMapStaticUrl1POI = "https://maps.google.com/maps/api/staticmap?markers=color:red%%7C%s,%s&zoom=14&size=400x400&sensor=true&key=%s";

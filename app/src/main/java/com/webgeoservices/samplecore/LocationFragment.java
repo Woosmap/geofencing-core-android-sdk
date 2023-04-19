@@ -76,6 +76,7 @@ public class LocationFragment extends Fragment {
                     mPositionsManager.calculateDistance(latOrigin, lngOrigin, listDestinationPoint, param, place.getLocationId() );
                     param.put( "distanceProvider","WoosmapTraffic" );
                     param.put( "trafficDistanceRouting","balanced" );
+                    param.put( "trafficDistanceMethod","distance" );
                     param.put( "distanceMode","driving" );
                     param.put( "distanceUnits","metric" );
                     param.put( "distanceLanguage","fr" );

@@ -570,11 +570,11 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         lngOrigin: Double,
         listPosition: MutableList<Pair<Double, Double>>,
         locationId: Int = 0,
-        considerTrafic: Boolean = false,
+        distanceWithTraffic: Boolean = false,
         parameters: Map<String, String> = emptyMap(),
     ) {
         var requestUrl = WoosmapSettingsCore.DistanceAPIUrl
-        if (considerTrafic){
+        if (distanceWithTraffic){
             requestUrl = WoosmapSettingsCore.DistanceAPIWithTrafficUrl
         }
         if (requestQueue == null) {
@@ -594,6 +594,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         var mode = WoosmapSettingsCore.distanceMode
         var units = WoosmapSettingsCore.distanceUnits
         var language = WoosmapSettingsCore.distanceLanguage
+        var method = WoosmapSettingsCore.trafficDistanceMethod
         if (parameters.isEmpty()) {
             url = String.format(
                 requestUrl,
@@ -604,7 +605,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 latOrigin,
                 lngOrigin,
                 destination,
-                WoosmapSettingsCore.privateKeyWoosmapAPI
+                WoosmapSettingsCore.privateKeyWoosmapAPI,
+                method,
             )
         } else {
             if (parameters.containsKey("distanceMode")) {
@@ -616,6 +618,9 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             if (parameters.containsKey("distanceLanguage")) {
                 language = parameters["distanceLanguage"]
             }
+            if (parameters.containsKey("trafficDistanceMethod")) {
+                method = parameters["trafficDistanceMethod"]
+            }
             url = String.format(
                 requestUrl,
                 WoosmapSettingsCore.WoosmapURL,
@@ -625,7 +630,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 latOrigin,
                 lngOrigin,
                 destination,
-                WoosmapSettingsCore.privateKeyWoosmapAPI
+                WoosmapSettingsCore.privateKeyWoosmapAPI,
+                method,
             )
         }
         val req = APIHelperCore.getInstance(context).createGetReuqest(
@@ -649,7 +655,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                                     distance.distanceText = element.distance.text
                                     distance.duration = element.duration.value
                                     distance.durationText = element.duration.text
-                                    distance.routing = WoosmapSettingsCore.trafficDistanceRouting
+                                    distance.routing = method
                                     distance.mode = mode
                                     distance.units = units
                                     distance.language = language

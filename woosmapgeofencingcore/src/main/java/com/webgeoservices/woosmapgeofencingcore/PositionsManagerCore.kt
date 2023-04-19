@@ -618,6 +618,17 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             if (parameters.containsKey("distanceLanguage")) {
                 language = parameters["distanceLanguage"]
             }
+            //Check if params contains old trafficDistanceRouting
+            if (parameters.containsKey("trafficDistanceRouting")) {
+                var value = parameters["trafficDistanceRouting"]
+                if (value.equals(WoosmapSettingsCore.fastest, true)){
+                    method = WoosmapSettingsCore.time;
+                }
+                if (value.equals(WoosmapSettingsCore.balanced, true)){
+                    method = WoosmapSettingsCore.distance;
+                }
+            }
+            //Override method param value if trafficDistanceMethod exists
             if (parameters.containsKey("trafficDistanceMethod")) {
                 method = parameters["trafficDistanceMethod"]
             }

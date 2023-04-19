@@ -206,15 +206,26 @@ public class WoosmapSettingsCore {
     public static final String woosmapTraffic = "WoosmapTraffic";
     static public String distanceProvider = woosmapDistance;
 
-    //Distance Routing
-    private static final String fastest = "fastest";
-    private static final String balanced = "balanced";
+    /***
+     * @deprecated Set `time` value to `trafficDistanceMethod` setting instead
+     */
+    @Deprecated
+    protected static final String fastest = "fastest";
+    /***
+     * @deprecated Set `distance` value to `trafficDistanceMethod` setting instead
+     */
+    @Deprecated
+    protected static final String balanced = "balanced";
+    /***
+     * @deprecated Use `trafficDistanceMethod` instead.
+     */
+    @Deprecated
     static public String trafficDistanceRouting = fastest;
 
     //Disatnce method
-    private static final String time = "time";
-    private static final String distance = "distance";
-    static public String trafficDistanceMethod = time;
+    protected static final String time = "time";
+    protected static final String distance = "distance";
+    static protected String trafficDistanceMethod = time;
 
     //Distance Language
     static public String distanceLanguage = "en";
@@ -241,6 +252,7 @@ public class WoosmapSettingsCore {
         }
     }
 
+    @Deprecated
     public static void setTrafficDistanceRouting(String trafficDistanceRouting) {
         if (trafficDistanceRouting.equals(fastest) || trafficDistanceRouting.equals(balanced)) {
             WoosmapSettingsCore.trafficDistanceRouting = trafficDistanceRouting;
@@ -255,6 +267,10 @@ public class WoosmapSettingsCore {
         } else {
             WoosmapSettingsCore.trafficDistanceMethod = time;
         }
+    }
+
+    public static String getTrafficDistanceMethod(){
+        return WoosmapSettingsCore.trafficDistanceMethod;
     }
 
     public static void setDistanceLanguage(String distanceLanguage) {

@@ -202,8 +202,25 @@ public class WoosmapSettingsCore {
     static public String distanceMode = drivingMode;
 
     //Distance Provider
+    /***
+     * @deprecated
+     * Setting the value of `distanceProvider` property is now deprecated.
+     * Woosmap Distance API will always be used as the provider.
+     */
+    @Deprecated
     public static final String woosmapDistance = "WoosmapDistance";
+
+    /***
+     * @deprecated
+     * Setting the value of `distanceProvider` property is now deprecated.
+     * Woosmap Distance API will always be used as the provider.
+     */
+    @Deprecated
     public static final String woosmapTraffic = "WoosmapTraffic";
+    /***
+     * @deprecated `distanceProvider` property is now deprecated. Woosmap Distance API will always be used as the provider.
+     */
+    @Deprecated
     static public String distanceProvider = woosmapDistance;
 
     /***
@@ -244,6 +261,13 @@ public class WoosmapSettingsCore {
 
     }
 
+    /***
+     * Setting the distance provider is now deprecated. The SDK will now always use Distance API as distance provider.
+     * The value you set here will be ignored. If you need to get the distance with traffic considerations then pass `distanceWithTraffic` as `true` to
+     * `PositionManagerCore` class' `calculateDistance` method
+     * @param distanceProvider
+     */
+    @Deprecated
     public static void setDistanceProvider(String distanceProvider) {
         if (distanceProvider.equals(woosmapDistance) || distanceProvider.equals(woosmapTraffic)) {
             WoosmapSettingsCore.distanceProvider = distanceProvider;
@@ -290,6 +314,13 @@ public class WoosmapSettingsCore {
         return distanceMode;
     }
 
+    /***
+     * @deprecated Setting the distance provider is now deprecated. The SDK will now always use Distance API as distance provider.
+     * If you need to get the distance with traffic considerations then pass `distanceWithTraffic` as `true` to
+     * `PositionManagerCore` class' `calculateDistance` method.
+     * @return the distane provider service.
+     */
+    @Deprecated
     public static String getDistanceProvider() {
         return distanceProvider;
     }

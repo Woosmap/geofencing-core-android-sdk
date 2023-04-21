@@ -230,12 +230,12 @@ public class WoosmapSettingsCore {
     @Deprecated
     protected static final String fastest = "fastest";
     /***
-     * @deprecated Set `distance` value to `trafficDistanceMethod` setting instead
+     * @deprecated Set `distance` value to `distanceMethod` setting instead
      */
     @Deprecated
     protected static final String balanced = "balanced";
     /***
-     * @deprecated Use `trafficDistanceMethod` instead.
+     * @deprecated Use `distanceMethod` instead.
      */
     @Deprecated
     static public String trafficDistanceRouting = fastest;

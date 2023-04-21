@@ -98,6 +98,7 @@ public class WoosmapSettingsCore {
         WoosmapSettingsCore.distanceAPIEnable = mPrefs.getBoolean("distanceAPIEnable", WoosmapSettingsCore.distanceAPIEnable);
         WoosmapSettingsCore.trafficDistanceRouting = mPrefs.getString("trafficDistanceRouting", WoosmapSettingsCore.trafficDistanceRouting);
         WoosmapSettingsCore.trafficDistanceMethod = mPrefs.getString("trafficDistanceMethod", WoosmapSettingsCore.trafficDistanceMethod);
+        WoosmapSettingsCore.distanceWithTraffic = mPrefs.getBoolean("trafficDistanceMethod", WoosmapSettingsCore.distanceWithTraffic);
         WoosmapSettingsCore.distanceProvider = mPrefs.getString("distanceProvider", WoosmapSettingsCore.distanceProvider);
         WoosmapSettingsCore.distanceUnits = mPrefs.getString("distanceUnits", WoosmapSettingsCore.distanceUnits);
         WoosmapSettingsCore.distanceLanguage = mPrefs.getString("distanceLanguage", WoosmapSettingsCore.distanceLanguage);
@@ -244,6 +245,8 @@ public class WoosmapSettingsCore {
     protected static final String distance = "distance";
     static protected String trafficDistanceMethod = time;
 
+    protected static boolean distanceWithTraffic = false;
+
     //Distance Language
     static public String distanceLanguage = "en";
 
@@ -285,12 +288,20 @@ public class WoosmapSettingsCore {
         }
     }
 
+    public static void setDistanceWithTraffic(boolean value){
+        WoosmapSettingsCore.distanceWithTraffic = value;
+    }
+
     public static void setTrafficDistanceMethod(String trafficDistanceMethod) {
         if (trafficDistanceMethod.equals(time) || trafficDistanceMethod.equals(distance)) {
             WoosmapSettingsCore.trafficDistanceMethod = trafficDistanceMethod;
         } else {
             WoosmapSettingsCore.trafficDistanceMethod = time;
         }
+    }
+
+    public static boolean getDistanceWithTrafic(){
+        return WoosmapSettingsCore.distanceWithTraffic;
     }
 
     public static String getTrafficDistanceMethod(){

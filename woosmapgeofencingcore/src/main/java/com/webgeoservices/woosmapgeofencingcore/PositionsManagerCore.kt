@@ -533,7 +533,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         listPosition: MutableList<Pair<Double, Double>>,
         locationId: Int = 0,
     ) {
-        calculateDistance(latOrigin, lngOrigin, listPosition, emptyMap(), locationId, false);
+        calculateDistance(latOrigin, lngOrigin, listPosition, emptyMap(), locationId, WoosmapSettingsCore.distanceWithTraffic);
     }
 
     fun calculateDistance(
@@ -553,7 +553,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         parameters: Map<String, String>,
         locationId: Int = 0,
     ) {
-        calculateDistance(latOrigin, lngOrigin, listPosition, parameters, locationId, false)
+        calculateDistance(latOrigin, lngOrigin, listPosition, parameters, locationId, WoosmapSettingsCore.distanceWithTraffic)
     }
 
     fun calculateDistance(

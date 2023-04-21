@@ -616,7 +616,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         var mode = WoosmapSettingsCore.distanceMode
         var units = WoosmapSettingsCore.distanceUnits
         var language = WoosmapSettingsCore.distanceLanguage
-        var method = WoosmapSettingsCore.trafficDistanceMethod
+        var method = WoosmapSettingsCore.distanceMethod
         if (parameters.isEmpty()) {
             url = String.format(
                 requestUrl,

@@ -97,7 +97,7 @@ public class WoosmapSettingsCore {
         WoosmapSettingsCore.distanceMaxAirDistanceFilter = mPrefs.getInt("distanceMaxAirDistanceFilter", WoosmapSettingsCore.distanceMaxAirDistanceFilter);
         WoosmapSettingsCore.distanceAPIEnable = mPrefs.getBoolean("distanceAPIEnable", WoosmapSettingsCore.distanceAPIEnable);
         WoosmapSettingsCore.trafficDistanceRouting = mPrefs.getString("trafficDistanceRouting", WoosmapSettingsCore.trafficDistanceRouting);
-        WoosmapSettingsCore.trafficDistanceMethod = mPrefs.getString("trafficDistanceMethod", WoosmapSettingsCore.trafficDistanceMethod);
+        WoosmapSettingsCore.distanceMethod = mPrefs.getString("trafficDistanceMethod", WoosmapSettingsCore.distanceMethod);
         WoosmapSettingsCore.distanceWithTraffic = mPrefs.getBoolean("trafficDistanceMethod", WoosmapSettingsCore.distanceWithTraffic);
         WoosmapSettingsCore.distanceProvider = mPrefs.getString("distanceProvider", WoosmapSettingsCore.distanceProvider);
         WoosmapSettingsCore.distanceUnits = mPrefs.getString("distanceUnits", WoosmapSettingsCore.distanceUnits);
@@ -243,7 +243,7 @@ public class WoosmapSettingsCore {
     //Disatnce method
     protected static final String time = "time";
     protected static final String distance = "distance";
-    static protected String trafficDistanceMethod = time;
+    static protected String distanceMethod = time;
 
     protected static boolean distanceWithTraffic = false;
 
@@ -292,11 +292,11 @@ public class WoosmapSettingsCore {
         WoosmapSettingsCore.distanceWithTraffic = value;
     }
 
-    public static void setTrafficDistanceMethod(String trafficDistanceMethod) {
-        if (trafficDistanceMethod.equals(time) || trafficDistanceMethod.equals(distance)) {
-            WoosmapSettingsCore.trafficDistanceMethod = trafficDistanceMethod;
+    public static void setDistanceMethod(String distanceMethod) {
+        if (distanceMethod.equals(time) || distanceMethod.equals(distance)) {
+            WoosmapSettingsCore.distanceMethod = distanceMethod;
         } else {
-            WoosmapSettingsCore.trafficDistanceMethod = time;
+            WoosmapSettingsCore.distanceMethod = time;
         }
     }
 
@@ -304,8 +304,8 @@ public class WoosmapSettingsCore {
         return WoosmapSettingsCore.distanceWithTraffic;
     }
 
-    public static String getTrafficDistanceMethod(){
-        return WoosmapSettingsCore.trafficDistanceMethod;
+    public static String getDistanceMethod(){
+        return WoosmapSettingsCore.distanceMethod;
     }
 
     public static void setDistanceLanguage(String distanceLanguage) {

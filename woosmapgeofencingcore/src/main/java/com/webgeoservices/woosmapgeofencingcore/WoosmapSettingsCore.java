@@ -41,6 +41,8 @@ public class WoosmapSettingsCore {
         prefsEditor.putString("distanceMode", distanceMode);
         prefsEditor.putString("trafficDistanceRouting", trafficDistanceRouting);
         prefsEditor.putString("distanceProvider", distanceProvider);
+        prefsEditor.putString("distanceMethod", distanceMethod);
+        prefsEditor.putBoolean("distanceWithTraffic", distanceWithTraffic);
         prefsEditor.putString("distanceUnits", distanceUnits);
         prefsEditor.putString("distanceLanguage", distanceLanguage);
         prefsEditor.putInt("accuracyFilter", accuracyFilter);
@@ -97,6 +99,8 @@ public class WoosmapSettingsCore {
         WoosmapSettingsCore.distanceMaxAirDistanceFilter = mPrefs.getInt("distanceMaxAirDistanceFilter", WoosmapSettingsCore.distanceMaxAirDistanceFilter);
         WoosmapSettingsCore.distanceAPIEnable = mPrefs.getBoolean("distanceAPIEnable", WoosmapSettingsCore.distanceAPIEnable);
         WoosmapSettingsCore.trafficDistanceRouting = mPrefs.getString("trafficDistanceRouting", WoosmapSettingsCore.trafficDistanceRouting);
+        WoosmapSettingsCore.distanceMethod = mPrefs.getString("distanceMethod", WoosmapSettingsCore.distanceMethod);
+        WoosmapSettingsCore.distanceWithTraffic = mPrefs.getBoolean("distanceWithTraffic", WoosmapSettingsCore.distanceWithTraffic);
         WoosmapSettingsCore.distanceProvider = mPrefs.getString("distanceProvider", WoosmapSettingsCore.distanceProvider);
         WoosmapSettingsCore.distanceUnits = mPrefs.getString("distanceUnits", WoosmapSettingsCore.distanceUnits);
         WoosmapSettingsCore.distanceLanguage = mPrefs.getString("distanceLanguage", WoosmapSettingsCore.distanceLanguage);
@@ -201,14 +205,49 @@ public class WoosmapSettingsCore {
     static public String distanceMode = drivingMode;
 
     //Distance Provider
+    /***
+     * @deprecated
+     * Setting the value of `distanceProvider` property is now deprecated.
+     * Woosmap Distance API will always be used as the provider.
+     */
+    @Deprecated
     public static final String woosmapDistance = "WoosmapDistance";
+
+    /***
+     * @deprecated
+     * Setting the value of `distanceProvider` property is now deprecated.
+     * Woosmap Distance API will always be used as the provider.
+     */
+    @Deprecated
     public static final String woosmapTraffic = "WoosmapTraffic";
+    /***
+     * @deprecated `distanceProvider` property is now deprecated. Woosmap Distance API will always be used as the provider.
+     */
+    @Deprecated
     static public String distanceProvider = woosmapDistance;
 
-    //Distance Routing
-    private static final String fastest = "fastest";
-    private static final String balanced = "balanced";
+    /***
+     * @deprecated Set `time` value to `trafficDistanceMethod` setting instead
+     */
+    @Deprecated
+    protected static final String fastest = "fastest";
+    /***
+     * @deprecated Set `distance` value to `distanceMethod` setting instead
+     */
+    @Deprecated
+    protected static final String balanced = "balanced";
+    /***
+     * @deprecated Use `distanceMethod` instead.
+     */
+    @Deprecated
     static public String trafficDistanceRouting = fastest;
+
+    //Disatnce method
+    protected static final String time = "time";
+    protected static final String distance = "distance";
+    static protected String distanceMethod = time;
+
+    protected static boolean distanceWithTraffic = false;
 
     //Distance Language
     static public String distanceLanguage = "en";
@@ -227,6 +266,13 @@ public class WoosmapSettingsCore {
 
     }
 
+    /***
+     * Setting the distance provider is now deprecated. The SDK will now always use Distance API as distance provider.
+     * The value you set here will be ignored. If you need to get the distance with traffic considerations then pass `distanceWithTraffic` as `true` to
+     * `PositionManagerCore` class' `calculateDistance` method
+     * @param distanceProvider
+     */
+    @Deprecated
     public static void setDistanceProvider(String distanceProvider) {
         if (distanceProvider.equals(woosmapDistance) || distanceProvider.equals(woosmapTraffic)) {
             WoosmapSettingsCore.distanceProvider = distanceProvider;
@@ -235,12 +281,33 @@ public class WoosmapSettingsCore {
         }
     }
 
+    @Deprecated
     public static void setTrafficDistanceRouting(String trafficDistanceRouting) {
         if (trafficDistanceRouting.equals(fastest) || trafficDistanceRouting.equals(balanced)) {
             WoosmapSettingsCore.trafficDistanceRouting = trafficDistanceRouting;
         } else {
             WoosmapSettingsCore.trafficDistanceRouting = fastest;
         }
+    }
+
+    public static void setDistanceWithTraffic(boolean value){
+        WoosmapSettingsCore.distanceWithTraffic = value;
+    }
+
+    public static void setDistanceMethod(String distanceMethod) {
+        if (distanceMethod.equals(time) || distanceMethod.equals(distance)) {
+            WoosmapSettingsCore.distanceMethod = distanceMethod;
+        } else {
+            WoosmapSettingsCore.distanceMethod = time;
+        }
+    }
+
+    public static boolean getDistanceWithTraffic(){
+        return WoosmapSettingsCore.distanceWithTraffic;
+    }
+
+    public static String getDistanceMethod(){
+        return WoosmapSettingsCore.distanceMethod;
     }
 
     public static void setDistanceLanguage(String distanceLanguage) {
@@ -260,6 +327,13 @@ public class WoosmapSettingsCore {
         return distanceMode;
     }
 
+    /***
+     * @deprecated Setting the distance provider is now deprecated. The SDK will now always use Distance API as distance provider.
+     * If you need to get the distance with traffic considerations then pass `distanceWithTraffic` as `true` to
+     * `PositionManagerCore` class' `calculateDistance` method.
+     * @return the distane provider service.
+     */
+    @Deprecated
     public static String getDistanceProvider() {
         return distanceProvider;
     }
@@ -325,7 +399,8 @@ public class WoosmapSettingsCore {
 
     public static String WoosmapURL = "https://api.woosmap.com";
     public static String SearchAPIUrl = "%s/stores/search/?private_key=%s&lat=%s&lng=%s&stores_by_page=20";
-    public static String DistanceAPIUrl = "%s/distance/distancematrix/json?mode=%s&units=%s&language=%s&origins=%s,%s&destinations=%s&private_key=%s&elements=duration_distance";
+    public static String DistanceAPIUrl = "%s/distance/distancematrix/json?mode=%s&units=%s&language=%s&origins=%s,%s&destinations=%s&private_key=%s&method=%s&elements=duration_distance";
+    public static String DistanceAPIWithTrafficUrl = "%s/distance/distancematrix/json?mode=%s&units=%s&language=%s&origins=%s,%s&destinations=%s&private_key=%s&method=%s&departure_time=now&elements=duration_distance";
     public static String TrafficDistanceAPIUrl = "%s/traffic/distancematrix/json?mode=%s&units=%s&language=%s&routing=%s&origins=%s,%s&destinations=%s&private_key=%s";
     public static String GoogleMapStaticUrl = "https://maps.google.com/maps/api/staticmap?markers=color:red%%7C%s,%s&markers=color:blue%%7C%s,%s&zoom=14&size=400x400&sensor=true&key=%s";
     public static String GoogleMapStaticUrl1POI = "https://maps.google.com/maps/api/staticmap?markers=color:red%%7C%s,%s&zoom=14&size=400x400&sensor=true&key=%s";

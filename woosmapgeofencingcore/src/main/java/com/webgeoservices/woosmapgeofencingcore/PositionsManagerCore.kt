@@ -512,7 +512,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     fun calculateDistance(
         latOrigin: Double,
         lngOrigin: Double,
-        listPosition: MutableList<Pair<Double, Double>>
+        listPosition: MutableList<Pair<Double, Double>>,
     ) {
         calculateDistance(latOrigin, lngOrigin, listPosition, 0)
     }
@@ -521,18 +521,29 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         latOrigin: Double,
         lngOrigin: Double,
         listPosition: MutableList<Pair<Double, Double>>,
-        locationId: Int = 0
+        distanceWithTraffic: Boolean = false,
     ) {
-        if (WoosmapSettingsCore.distanceProvider == WoosmapSettingsCore.woosmapDistance) {
-            distanceAPI(latOrigin, lngOrigin, listPosition, locationId)
-        } else {
-            trafficDistanceAPI(
-                latOrigin,
-                lngOrigin,
-                listPosition,
-                locationId,
-            )
-        }
+        calculateDistance(latOrigin, lngOrigin, listPosition, 0, distanceWithTraffic)
+    }
+
+
+    fun calculateDistance(
+        latOrigin: Double,
+        lngOrigin: Double,
+        listPosition: MutableList<Pair<Double, Double>>,
+        locationId: Int = 0,
+    ) {
+        calculateDistance(latOrigin, lngOrigin, listPosition, emptyMap(), locationId, WoosmapSettingsCore.distanceWithTraffic);
+    }
+
+    fun calculateDistance(
+        latOrigin: Double,
+        lngOrigin: Double,
+        listPosition: MutableList<Pair<Double, Double>>,
+        locationId: Int = 0,
+        distanceWithTraffic: Boolean
+    ){
+        calculateDistance(latOrigin, lngOrigin, listPosition, emptyMap(), locationId, distanceWithTraffic);
     }
 
     fun calculateDistance(
@@ -540,24 +551,39 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         lngOrigin: Double,
         listPosition: MutableList<Pair<Double, Double>>,
         parameters: Map<String, String>,
-        locationId: Int = 0
+        locationId: Int = 0,
     ) {
-        var provider = WoosmapSettingsCore.distanceProvider
-        if (parameters.containsKey("distanceProvider")) {
-            provider = parameters["distanceProvider"]
-        }
+        calculateDistance(latOrigin, lngOrigin, listPosition, parameters, locationId, WoosmapSettingsCore.distanceWithTraffic)
+    }
 
-        if (provider == WoosmapSettingsCore.woosmapDistance) {
-            distanceAPI(latOrigin, lngOrigin, listPosition, locationId, parameters)
-        } else {
-            trafficDistanceAPI(
-                latOrigin,
-                lngOrigin,
-                listPosition,
-                locationId,
-                parameters
-            )
+    fun calculateDistance(
+        latOrigin: Double,
+        lngOrigin: Double,
+        listPosition: MutableList<Pair<Double, Double>>,
+        parameters: Map<String, String> = emptyMap(),
+        locationId: Int = 0,
+        distanceWithTraffic: Boolean = false,
+    ){
+        var shouldUseTraffic = distanceWithTraffic
+        if (parameters.containsKey("distanceProvider")) {
+            Log.w(WoosmapSettingsCore.WoosmapSdkTag,
+                "`distanceProvider` property is now deprecated. Woosmap Distance API will always be used as the provider. " +
+                        "To use traffic data pass `distanceWithTraffic = true` to `calculateDistance` method")
+            var provider = parameters.get("distanceProvider")
+
+            //For backward compatibility is a client is setting distanceProvider as woosmapTraffic then send distanceWithTraffic as true
+            if (provider == WoosmapSettingsCore.woosmapTraffic) {
+                shouldUseTraffic = true
+            }
         }
+        distanceAPI(
+            latOrigin,
+            lngOrigin,
+            listPosition,
+            locationId,
+            shouldUseTraffic,
+            parameters
+        )
     }
 
 
@@ -566,8 +592,13 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         lngOrigin: Double,
         listPosition: MutableList<Pair<Double, Double>>,
         locationId: Int = 0,
+        distanceWithTraffic: Boolean = false,
         parameters: Map<String, String> = emptyMap(),
     ) {
+        var requestUrl = WoosmapSettingsCore.DistanceAPIUrl
+        if (distanceWithTraffic){
+            requestUrl = WoosmapSettingsCore.DistanceAPIWithTrafficUrl
+        }
         if (requestQueue == null) {
             requestQueue = Volley.newRequestQueue(this.context)
         }
@@ -585,9 +616,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         var mode = WoosmapSettingsCore.distanceMode
         var units = WoosmapSettingsCore.distanceUnits
         var language = WoosmapSettingsCore.distanceLanguage
+        var method = WoosmapSettingsCore.distanceMethod
         if (parameters.isEmpty()) {
             url = String.format(
-                WoosmapSettingsCore.DistanceAPIUrl,
+                requestUrl,
                 WoosmapSettingsCore.WoosmapURL,
                 WoosmapSettingsCore.distanceMode,
                 WoosmapSettingsCore.getDistanceUnits(),
@@ -595,7 +627,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 latOrigin,
                 lngOrigin,
                 destination,
-                WoosmapSettingsCore.privateKeyWoosmapAPI
+                WoosmapSettingsCore.privateKeyWoosmapAPI,
+                method,
             )
         } else {
             if (parameters.containsKey("distanceMode")) {
@@ -607,8 +640,22 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             if (parameters.containsKey("distanceLanguage")) {
                 language = parameters["distanceLanguage"]
             }
+            //Check if params contains old trafficDistanceRouting
+            if (parameters.containsKey("trafficDistanceRouting")) {
+                var value = parameters["trafficDistanceRouting"]
+                if (value.equals(WoosmapSettingsCore.fastest, true)){
+                    method = WoosmapSettingsCore.time;
+                }
+                if (value.equals(WoosmapSettingsCore.balanced, true)){
+                    method = WoosmapSettingsCore.distance;
+                }
+            }
+            //Override method param value if trafficDistanceMethod exists
+            if (parameters.containsKey("trafficDistanceMethod")) {
+                method = parameters["trafficDistanceMethod"]
+            }
             url = String.format(
-                WoosmapSettingsCore.DistanceAPIUrl,
+                requestUrl,
                 WoosmapSettingsCore.WoosmapURL,
                 mode,
                 units,
@@ -616,7 +663,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 latOrigin,
                 lngOrigin,
                 destination,
-                WoosmapSettingsCore.privateKeyWoosmapAPI
+                WoosmapSettingsCore.privateKeyWoosmapAPI,
+                method,
             )
         }
         val req = APIHelperCore.getInstance(context).createGetReuqest(
@@ -640,7 +688,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                                     distance.distanceText = element.distance.text
                                     distance.duration = element.duration.value
                                     distance.durationText = element.duration.text
-                                    distance.routing = WoosmapSettingsCore.trafficDistanceRouting
+                                    distance.routing = method
                                     distance.mode = mode
                                     distance.units = units
                                     distance.language = language

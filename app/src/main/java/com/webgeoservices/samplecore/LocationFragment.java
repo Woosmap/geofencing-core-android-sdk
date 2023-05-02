@@ -67,19 +67,20 @@ public class LocationFragment extends Fragment {
                     listDestinationPoint.add(new Pair(49.987,0.223));*/
                     Double latOrigin = place.getLatitude();
                     Double lngOrigin = place.getLongitude();
-                    mPositionsManager.calculateDistance(latOrigin, lngOrigin, listDestinationPoint, place.getLocationId());
+                    mPositionsManager.calculateDistance(latOrigin, lngOrigin, listDestinationPoint, place.getLocationId(), false);
                     Map<String, String> param = new HashMap<String, String>();
                     param.put( "distanceProvider","woosmapDistance" );
                     param.put( "distanceMode","walking" );
                     param.put( "distanceUnits","imperial" );
                     param.put( "distanceLanguage","en" );
-                    mPositionsManager.calculateDistance(latOrigin, lngOrigin, listDestinationPoint, param, place.getLocationId() );
+                    mPositionsManager.calculateDistance(latOrigin, lngOrigin, listDestinationPoint, param, place.getLocationId(), false);
                     param.put( "distanceProvider","WoosmapTraffic" );
                     param.put( "trafficDistanceRouting","balanced" );
+                    param.put( "trafficDistanceMethod","distance" );
                     param.put( "distanceMode","driving" );
                     param.put( "distanceUnits","metric" );
                     param.put( "distanceLanguage","fr" );
-                    mPositionsManager.calculateDistance(latOrigin, lngOrigin, listDestinationPoint, param, place.getLocationId() );
+                    mPositionsManager.calculateDistance(latOrigin, lngOrigin, listDestinationPoint, param, place.getLocationId(), true);
                 }
             }
         });

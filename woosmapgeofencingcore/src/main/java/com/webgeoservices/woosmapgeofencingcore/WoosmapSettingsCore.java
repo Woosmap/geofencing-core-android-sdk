@@ -300,7 +300,7 @@ public class WoosmapSettingsCore {
         }
     }
 
-    public static boolean getDistanceWithTrafic(){
+    public static boolean getDistanceWithTraffic(){
         return WoosmapSettingsCore.distanceWithTraffic;
     }
 

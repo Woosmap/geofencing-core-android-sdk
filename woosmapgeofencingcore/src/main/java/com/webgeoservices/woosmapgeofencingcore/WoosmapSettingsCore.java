@@ -41,6 +41,8 @@ public class WoosmapSettingsCore {
         prefsEditor.putString("distanceMode", distanceMode);
         prefsEditor.putString("trafficDistanceRouting", trafficDistanceRouting);
         prefsEditor.putString("distanceProvider", distanceProvider);
+        prefsEditor.putString("distanceMethod", distanceMethod);
+        prefsEditor.putBoolean("distanceWithTraffic", distanceWithTraffic);
         prefsEditor.putString("distanceUnits", distanceUnits);
         prefsEditor.putString("distanceLanguage", distanceLanguage);
         prefsEditor.putInt("accuracyFilter", accuracyFilter);
@@ -97,8 +99,8 @@ public class WoosmapSettingsCore {
         WoosmapSettingsCore.distanceMaxAirDistanceFilter = mPrefs.getInt("distanceMaxAirDistanceFilter", WoosmapSettingsCore.distanceMaxAirDistanceFilter);
         WoosmapSettingsCore.distanceAPIEnable = mPrefs.getBoolean("distanceAPIEnable", WoosmapSettingsCore.distanceAPIEnable);
         WoosmapSettingsCore.trafficDistanceRouting = mPrefs.getString("trafficDistanceRouting", WoosmapSettingsCore.trafficDistanceRouting);
-        WoosmapSettingsCore.distanceMethod = mPrefs.getString("trafficDistanceMethod", WoosmapSettingsCore.distanceMethod);
-        WoosmapSettingsCore.distanceWithTraffic = mPrefs.getBoolean("trafficDistanceMethod", WoosmapSettingsCore.distanceWithTraffic);
+        WoosmapSettingsCore.distanceMethod = mPrefs.getString("distanceMethod", WoosmapSettingsCore.distanceMethod);
+        WoosmapSettingsCore.distanceWithTraffic = mPrefs.getBoolean("distanceWithTraffic", WoosmapSettingsCore.distanceWithTraffic);
         WoosmapSettingsCore.distanceProvider = mPrefs.getString("distanceProvider", WoosmapSettingsCore.distanceProvider);
         WoosmapSettingsCore.distanceUnits = mPrefs.getString("distanceUnits", WoosmapSettingsCore.distanceUnits);
         WoosmapSettingsCore.distanceLanguage = mPrefs.getString("distanceLanguage", WoosmapSettingsCore.distanceLanguage);

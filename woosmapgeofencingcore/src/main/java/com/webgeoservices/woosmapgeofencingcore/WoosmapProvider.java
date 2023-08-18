@@ -15,6 +15,7 @@ import com.webgeoservices.woosmapgeofencingcore.database.POI;
 import com.webgeoservices.woosmapgeofencingcore.database.Region;
 import com.webgeoservices.woosmapgeofencingcore.database.RegionLog;
 import com.webgeoservices.woosmapgeofencingcore.database.Visit;
+import com.webgeoservices.woosmapgeofencingcore.logging.LogListener;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -33,6 +34,7 @@ public abstract class WoosmapProvider {
     public RegionLogReadyListener regionLogReadyListener = null;
 
     public ProfileReadyListener profileReadyListener = null;
+    public LogListener logListener = null;
 
 
     protected void setupWoosmap(Context context) {

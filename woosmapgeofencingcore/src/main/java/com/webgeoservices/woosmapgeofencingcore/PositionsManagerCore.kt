@@ -17,6 +17,7 @@ import com.webgeoservices.woosmapgeofencingcore.DistanceAPIDataModel.DistanceAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPIResponseItemCore
 import com.webgeoservices.woosmapgeofencingcore.database.*
+import com.webgeoservices.woosmapgeofencingcore.logging.Logger
 import java.util.*
 
 open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider: WoosmapProvider) {
@@ -569,6 +570,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             Log.w(WoosmapSettingsCore.WoosmapSdkTag,
                 "`distanceProvider` property is now deprecated. Woosmap Distance API will always be used as the provider. " +
                         "To use traffic data pass `distanceWithTraffic = true` to `calculateDistance` method")
+
+            Logger.getInstance().w("`distanceProvider` property is now deprecated. Woosmap Distance API will always be used as the provider. " +
+                    "To use traffic data pass `distanceWithTraffic = true` to `calculateDistance` method")
+
             var provider = parameters.get("distanceProvider")
 
             //For backward compatibility is a client is setting distanceProvider as woosmapTraffic then send distanceWithTraffic as true
@@ -667,6 +672,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 method,
             )
         }
+        Logger.getInstance().d("Requesting API: {$url}")
         val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
@@ -709,6 +715,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
 
                     } else {
                         Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Distance API " + status)
+                        Logger.getInstance().e("Distance API status: " + status)
                     }
                     if (locationId != 0 && status.contains("OK") && data.rows.get(0).elements.get(0).status.contains(
                             "OK"
@@ -727,6 +734,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             },
             { error ->
                 Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
+                Logger.getInstance().e("Distance API Error: $error")
             }
         )
         requestQueue?.add(req)
@@ -1087,6 +1095,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             val region = this.db.regionsDAO.getRegionFromId(id)
             if (region != null) {
                 Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Region already exist")
+                Logger.getInstance().d("Region {$id} already exist")
             } else {
                 createRegion(id, radius.toDouble(), latitude, longitude, idStore)
             }
@@ -1095,10 +1104,12 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
             addOnSuccessListener {
                 Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onSuccess: Geofence Added...")
+                Logger.getInstance().d("onSuccess: Geofence Added...")
             }
             addOnFailureListener {
                 val errorMessage = geofenceHelper.getErrorString(exception)
                 Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure " + errorMessage)
+                Logger.getInstance().e("onFailure: " + errorMessage)
             }
         }
     }

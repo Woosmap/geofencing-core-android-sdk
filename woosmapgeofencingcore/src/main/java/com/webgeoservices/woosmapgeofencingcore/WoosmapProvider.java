@@ -34,11 +34,23 @@ public abstract class WoosmapProvider {
     public RegionLogReadyListener regionLogReadyListener = null;
 
     public ProfileReadyListener profileReadyListener = null;
-    public LogListener logListener = null;
+    private LogListener logListener = null;
 
 
     protected void setupWoosmap(Context context) {
         this.context = context;
+    }
+
+    /***
+     *
+     * @return
+     */
+    public LogListener getLogListener() {
+        return logListener;
+    }
+
+    protected void setLogListener(LogListener logListener) {
+        this.logListener = logListener;
     }
 
     public interface LocationReadyListener {

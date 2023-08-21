@@ -11,6 +11,7 @@ import android.util.Log;
 import com.google.android.gms.maps.model.LatLng;
 import com.webgeoservices.woosmapgeofencingcore.database.RegionLog;
 import com.webgeoservices.woosmapgeofencingcore.database.WoosmapDb;
+import com.webgeoservices.woosmapgeofencingcore.logging.Logger;
 
 import java.util.concurrent.Executors;
 
@@ -84,6 +85,7 @@ public class WoosmapCore extends WoosmapProvider{
     private void initWoosmap() {
         if (fcmToken == null) {
             Log.i(WoosmapSettingsCore.WoosmapSdkTag, "Message Token is null");
+            Logger.getInstance().i("Message Token is null");
         }
         super.woosmapInitFunctionality();
     }
@@ -119,6 +121,7 @@ public class WoosmapCore extends WoosmapProvider{
             this.locationManagerCore.updateLocationForeground();
         } else {
             Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Get Location permissions error");
+            Logger.getInstance().e("Get Location permissions error");
         }
         this.isForegroundEnabled = true;
         Executors.newSingleThreadExecutor().execute(new Runnable() {
@@ -144,6 +147,7 @@ public class WoosmapCore extends WoosmapProvider{
                 this.locationManagerCore.updateLocationBackground();
             } else {
                 Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Get Location permissions error");
+                Logger.getInstance().e("Get Location permissions error");
             }
         } catch (NullPointerException e) {
             Log.d("WoosmapGeofencing", "Foreground inactive");
@@ -171,6 +175,7 @@ public class WoosmapCore extends WoosmapProvider{
             this.locationManagerCore.setMonitoringRegions();
         } else {
             Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Get Location permissions error");
+            Logger.getInstance().e("Get Location permissions error");
         }
     }
 

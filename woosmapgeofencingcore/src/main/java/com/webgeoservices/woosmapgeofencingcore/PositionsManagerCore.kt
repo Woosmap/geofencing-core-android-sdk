@@ -414,6 +414,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             destination,
             WoosmapSettingsCore.privateKeyWoosmapAPI
         )
+        Logger.getInstance().d("Calling Distance API: $url")
         val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
@@ -438,7 +439,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
+                Log.e(WoosmapSettingsCore.WoosmapSdkTag, "$error Distance API")
+                Logger.getInstance().e("Distance API: $error ")
             }
         )
         requestQueue?.add(req)
@@ -463,6 +465,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         }
 
         val url = getStoreAPIUrl(lat, lng)
+        Logger.getInstance().d("Calling Search API: $url")
         val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
@@ -504,7 +507,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " search API")
+                Log.e(WoosmapSettingsCore.WoosmapSdkTag, "$error search API")
+                Logger.getInstance().e("Search API: $error")
             }
         )
         requestQueue?.add(req)
@@ -714,8 +718,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                         distanceApiResponseListener?.distanceApiData(data, distancesList)
 
                     } else {
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Distance API " + status)
-                        Logger.getInstance().e("Distance API status: " + status)
+                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Distance API $status")
+                        Logger.getInstance().e("Distance API status: $status")
                     }
                     if (locationId != 0 && status.contains("OK") && data.rows.get(0).elements.get(0).status.contains(
                             "OK"
@@ -733,7 +737,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
+                Log.e(WoosmapSettingsCore.WoosmapSdkTag, "$error Distance API")
                 Logger.getInstance().e("Distance API Error: $error")
             }
         )
@@ -868,6 +872,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             locationId,
             parameters
         )
+        Logger.getInstance().d("Calling Distance API: $url")
         var req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
@@ -898,7 +903,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
+                Log.e(WoosmapSettingsCore.WoosmapSdkTag, "$error Distance API")
+                Logger.getInstance().e("Distance API: $error")
             }
         )
         requestQueue?.add(req)
@@ -1108,8 +1114,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             }
             addOnFailureListener {
                 val errorMessage = geofenceHelper.getErrorString(exception)
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure " + errorMessage)
-                Logger.getInstance().e("onFailure: " + errorMessage)
+                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure $errorMessage")
+                Logger.getInstance().e("onFailure: $errorMessage")
             }
         }
     }
@@ -1141,23 +1147,27 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             if (regionOld == null) {
                 Log.d(
                     WoosmapSettingsCore.WoosmapSdkTag,
-                    "Region to replace not exist id = " + oldId
+                    "Region to replace not exist id = $oldId"
                 )
+                Logger.getInstance().d("Region to replace not exist id = $oldId")
             } else {
                 this.db.regionsDAO.deleteRegionFromId(oldId)
             }
             val regionNew = this.db.regionsDAO.getRegionFromId(newId)
             if (regionNew != null) {
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Region already exist id = " + newId)
+                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Region already exist id = $newId")
+                Logger.getInstance().d("Region already exist id = $newId")
             } else {
                 this.db.regionsDAO.createRegion(region)
                 mGeofencingClient.addGeofences(geofencingRequest, GeofencePendingIntent).run {
                     addOnSuccessListener {
                         Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onSuccess: Geofence Added...")
+                        Logger.getInstance().d("onSuccess: Geofence Added...")
                     }
                     addOnFailureListener {
                         val errorMessage = geofenceHelper.getErrorString(exception)
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure " + errorMessage)
+                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure $errorMessage")
+                        Logger.getInstance().e("onFailure: $errorMessage")
                     }
                 }
             }

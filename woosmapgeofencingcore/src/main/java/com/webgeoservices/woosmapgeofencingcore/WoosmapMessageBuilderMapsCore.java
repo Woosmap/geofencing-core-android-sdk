@@ -34,6 +34,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.Feature;
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPI;
+import com.webgeoservices.woosmapgeofencingcore.logging.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,8 +94,6 @@ public class WoosmapMessageBuilderMapsCore {
      * @param datas FCM message body received.
      */
     public void sendWoosmapNotification(final WoosmapMessageDatasCore datas) {
-        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Search API");
-
         /**
          * Compare Timestamp between Server and Mobile to know if the notification is outdated
          */
@@ -104,16 +103,16 @@ public class WoosmapMessageBuilderMapsCore {
             try {
                 Long tsServer = Long.parseLong(datas.timestamp);
                 if (tsServer + WoosmapSettingsCore.outOfTimeDelay < tsMobile) {
-                    Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Timestamp is outdated");
+                    Logger.getInstance().w("Timestamp is outdated");
                     return;
                 }
             } catch (NumberFormatException ex) { // handle your exception
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "invalid timestamp ");
+                Logger.getInstance().e("invalid timestamp: " + ex);
                 return;
             }
 
         } else {
-            Log.d(WoosmapSettingsCore.WoosmapSdkTag, "No timestamp is define in the payload");
+            Logger.getInstance().w("No timestamp is define in the payload");
             return;
         }
 
@@ -146,13 +145,13 @@ public class WoosmapMessageBuilderMapsCore {
             if (datas.open_uri != null) {
                 resultIntent.setData(Uri.parse(datas.open_uri));
             } else {
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Try to open empty URI");
+                Logger.getInstance().w("Try to open empty URI");
                 resultIntent.setData(Uri.parse(WoosmapSettingsCore.getNotificationDefaultUri(this.context)));
             }
         }
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         resultIntent.putExtra(WoosmapSettingsCore.WoosmapNotification, datas.notificationId);
-        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "notif: " + datas.notificationId);
+        Logger.getInstance().d("notif: " + datas.notificationId);
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
@@ -180,7 +179,7 @@ public class WoosmapMessageBuilderMapsCore {
             @Override
             public void onSuccess(final Location location) {
                 if (location == null) {
-                    Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Can't get user Location");
+                    Logger.getInstance().w("User location is null");
                     return;
                 }
                 //Request Search API with Google map Static
@@ -197,7 +196,7 @@ public class WoosmapMessageBuilderMapsCore {
             @Override
             public void onSuccess(final Location location) {
                 if (location == null) {
-                    Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Can't get user Location");
+                    Logger.getInstance().w("User location is null");
                     return;
                 }
                 //Request Search API
@@ -214,7 +213,7 @@ public class WoosmapMessageBuilderMapsCore {
             @Override
             public void onSuccess(final Location location) {
                 if (location == null) {
-                    Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Can't get user Location");
+                    Logger.getInstance().w("User location is null");
                     return;
                 }
                 // Fill body message with informations from API
@@ -235,7 +234,7 @@ public class WoosmapMessageBuilderMapsCore {
             @Override
             public void onSuccess(final Location location) {
                 if (location == null) {
-                    Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Can't get user Location");
+                    Logger.getInstance().w("User location is null");
                     return;
                 }
                 // Fill body message with informations from API
@@ -279,7 +278,7 @@ public class WoosmapMessageBuilderMapsCore {
                 }, 0, 0, null, null,
                 new Response.ErrorListener() {
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " maps.google.com");
+                        Logger.getInstance().e(error.toString(), error);
                         sendErrorNotification(context, "Google API : " + error.toString());
                     }
                 });
@@ -323,7 +322,7 @@ public class WoosmapMessageBuilderMapsCore {
             },
             error -> {
                 // Error request
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " search API");
+                Logger.getInstance().e("search API: " + error, error);
                 sendErrorNotification(context, "Search API : " + error.toString());
             }
         );
@@ -361,7 +360,7 @@ public class WoosmapMessageBuilderMapsCore {
 
     private void getLatestLocation(Context context, OnSuccessListener<Location> successListener) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(WoosmapSettingsCore.WoosmapSdkTag, "No permission");
+            Logger.getInstance().w("No location permission");
         } else {
             FusedLocationProviderClient locationProvider = LocationServices.getFusedLocationProviderClient(context);
             locationProvider.getLastLocation().addOnSuccessListener(successListener);

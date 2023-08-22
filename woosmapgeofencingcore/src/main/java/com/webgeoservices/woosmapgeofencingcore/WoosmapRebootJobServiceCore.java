@@ -7,6 +7,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 
+import com.webgeoservices.woosmapgeofencingcore.logging.Logger;
+
 
 public class WoosmapRebootJobServiceCore extends JobIntentService {
     private static final int JOB_ID = 0x01;
@@ -17,7 +19,7 @@ public class WoosmapRebootJobServiceCore extends JobIntentService {
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "start activity after reboot");
+        Logger.getInstance().d("start activity after reboot");
         WoosmapCore woosmapCore = WoosmapCore.getInstance().initializeWoosmapInBackground(getBaseContext());
         woosmapCore.onReboot();
 

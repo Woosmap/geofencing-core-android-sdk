@@ -29,7 +29,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     protected var requestQueue: RequestQueue? = null
 
     protected open fun visitsDetectionAlgo(lastVisit: Visit, location: Location) {
-        Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "get New Location")
+        Logger.getInstance().d("Visit detection for: $location")
         val lastVisitLocation = Location("Woosmap")
         lastVisitLocation.latitude = lastVisit.lat
         lastVisitLocation.longitude = lastVisit.lng
@@ -52,14 +52,14 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }
                 lastVisit.nbPoint += 1
                 this.db.visitsDao.updateStaticPosition(lastVisit)
-                Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "Always Static")
+                Logger.getInstance().d("Visit detection : last visit $lastVisit is active")
             }
             //Visit out
             else {
                 //Close the current visit
                 lastVisit.endTime = location.time
                 this.finishVisit(lastVisit)
-                Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "Not static Anyway")
+                Logger.getInstance().d("Visit detection : close visit $lastVisit")
             }
         }
         //not visit in progress
@@ -67,11 +67,12 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             val previousMovingPosition = this.db.movingPositionsDao.lastMovingPosition
             var distance = 0.0F;
             if (previousMovingPosition != null) {
+                Logger.getInstance().d("Visit detection: previousMovingPosition is not null")
                 distance = this.distanceBetweenLocationAndPosition(previousMovingPosition, location)
             }
-            Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "distance : $distance")
+            Logger.getInstance().d("Visit detection: distanceBetweenLocationAndPosition: $distance")
             if (distance >= WoosmapSettingsCore.distanceDetectionThresholdVisits) {
-                Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "We're Moving")
+                Logger.getInstance().d("Visit detection: distance >= WoosmapSettingsCore.distanceDetectionThresholdVisits: User is on the move")
             } else { //Create a new visit
                 val olderPosition = this.db.movingPositionsDao.previousLastMovingPosition
                 if (olderPosition != null) {
@@ -88,7 +89,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                         visit.endTime = 0
                         visit.nbPoint = 1
                         this.createVisit(visit)
-                        Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "Create new Visit")
+                        Logger.getInstance().d("Visit detection: Create new Visit")
                     }
                 }
             }
@@ -99,7 +100,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         val previousMovingPosition = this.db.movingPositionsDao.lastMovingPosition
             ?: this.createMovingPositionFromLocation(location)
         val distance = this.distanceBetweenLocationAndPosition(previousMovingPosition, location)
-        Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "distance : " + distance.toString())
+        Logger.getInstance().d("distanceBetweenLocationAndPosition: $distance" )
         if (distance >= WoosmapSettingsCore.currentLocationDistanceFilter) {
             this.createMovingPositionFromLocation(location)
         }
@@ -244,7 +245,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     }
 
     open fun manageLocation(location: Location) {
-        Log.d(WoosmapSettingsCore.WoosmapVisitsTag, location.toString())
+        Logger.getInstance().d("manageLocation: $location")
         storeVisitData(location)
         addPositionFromLocation(location)
     }
@@ -262,7 +263,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             if (lastVisit != null) {
                 this.visitsDetectionAlgo(lastVisit, location)
             } else {
-                Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "Empty")
+                Logger.getInstance().d("storeVisitData ($location): lastVisit is empty")
                 val staticLocation = Visit()
                 staticLocation.uuid = UUID.randomUUID().toString()
                 staticLocation.lat = location.latitude
@@ -297,7 +298,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 detectVisitInZOIClassified()
 
             } catch (e: Exception) {
-                Log.e(WoosmapSettingsCore.WoosmapVisitsTag, e.toString())
+                Logger.getInstance().e("Error: $e", e)
             }
         }.start()
     }
@@ -439,7 +440,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, "$error Distance API")
                 Logger.getInstance().e("Distance API: $error ")
             }
         )
@@ -507,7 +507,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, "$error search API")
                 Logger.getInstance().e("Search API: $error")
             }
         )
@@ -571,10 +570,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     ){
         var shouldUseTraffic = distanceWithTraffic
         if (parameters.containsKey("distanceProvider")) {
-            Log.w(WoosmapSettingsCore.WoosmapSdkTag,
-                "`distanceProvider` property is now deprecated. Woosmap Distance API will always be used as the provider. " +
-                        "To use traffic data pass `distanceWithTraffic = true` to `calculateDistance` method")
-
             Logger.getInstance().w("`distanceProvider` property is now deprecated. Woosmap Distance API will always be used as the provider. " +
                     "To use traffic data pass `distanceWithTraffic = true` to `calculateDistance` method")
 
@@ -718,7 +713,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                         distanceApiResponseListener?.distanceApiData(data, distancesList)
 
                     } else {
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Distance API $status")
                         Logger.getInstance().e("Distance API status: $status")
                     }
                     if (locationId != 0 && status.contains("OK") && data.rows.get(0).elements.get(0).status.contains(
@@ -737,7 +731,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, "$error Distance API")
                 Logger.getInstance().e("Distance API Error: $error")
             }
         )
@@ -896,14 +889,13 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                         trafficApiResponseListener?.trafficApiData(data, distancesList)
 
                     } else {
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Distance API " + status)
+                        Logger.getInstance().e("Distance API Status: $status")
                     }
                     updatePoiFromTrafficAPI(locationId, status, data)
 
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, "$error Distance API")
                 Logger.getInstance().e("Distance API: $error")
             }
         )
@@ -1100,7 +1092,6 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         Thread {
             val region = this.db.regionsDAO.getRegionFromId(id)
             if (region != null) {
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Region already exist")
                 Logger.getInstance().d("Region {$id} already exist")
             } else {
                 createRegion(id, radius.toDouble(), latitude, longitude, idStore)
@@ -1109,12 +1100,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
 
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
             addOnSuccessListener {
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onSuccess: Geofence Added...")
                 Logger.getInstance().d("onSuccess: Geofence Added...")
             }
             addOnFailureListener {
                 val errorMessage = geofenceHelper.getErrorString(exception)
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure $errorMessage")
                 Logger.getInstance().e("onFailure: $errorMessage")
             }
         }
@@ -1145,28 +1134,21 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         Thread {
             val regionOld = this.db.regionsDAO.getRegionFromId(oldId)
             if (regionOld == null) {
-                Log.d(
-                    WoosmapSettingsCore.WoosmapSdkTag,
-                    "Region to replace not exist id = $oldId"
-                )
                 Logger.getInstance().d("Region to replace not exist id = $oldId")
             } else {
                 this.db.regionsDAO.deleteRegionFromId(oldId)
             }
             val regionNew = this.db.regionsDAO.getRegionFromId(newId)
             if (regionNew != null) {
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Region already exist id = $newId")
                 Logger.getInstance().d("Region already exist id = $newId")
             } else {
                 this.db.regionsDAO.createRegion(region)
                 mGeofencingClient.addGeofences(geofencingRequest, GeofencePendingIntent).run {
                     addOnSuccessListener {
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onSuccess: Geofence Added...")
                         Logger.getInstance().d("onSuccess: Geofence Added...")
                     }
                     addOnFailureListener {
                         val errorMessage = geofenceHelper.getErrorString(exception)
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure $errorMessage")
                         Logger.getInstance().e("onFailure: $errorMessage")
                     }
                 }

@@ -388,15 +388,7 @@ public class WoosmapSettingsCore {
 
     static public HashMap<String, String> searchAPIParameters = new HashMap<String, String>();
     static public ArrayList<String> userPropertiesFilter = new ArrayList<String>();
-
-
-//    public static final String WoosmapSdkTag = "WoosmapSdk";
-//    public static final String WoosmapBackgroundTag = "WoosmapBackground";
-//    public static final String WoosmapVisitsTag = "WoosmapVisit";
     public static final String NotificationError = "NotificationError";
-//    public static final String WoosmapBroadcastTag = "WoosmapBroadcast";
-//    public static final String WoosmapGeofenceTag = "WoosmapGeofence";
-
 
     public static String WoosmapURL = "https://api.woosmap.com";
     public static String SearchAPIUrl = "%s/stores/search/?private_key=%s&lat=%s&lng=%s&stores_by_page=20";

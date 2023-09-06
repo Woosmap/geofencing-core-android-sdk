@@ -35,11 +35,15 @@ public class APIHelperCore {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new ArrayMap<>();
+                String sha1Hash = WoosmapSettingsCore.getSHA1CertificateHash(context);
                 headers.put("X-Api-Key", WoosmapSettingsCore.privateKeyWoosmapAPI);
                 headers.put("X-Android-Identifier", context.getPackageName());
                 headers.put("X-SDK-Source", "geofence-sdk");
                 headers.put("X-AK-SDK-Platform", "Android");
                 headers.put("X-AK-SDK-Version", WoosmapSettingsCore.getGeofencingSDKVersion());
+                if (sha1Hash != null){
+                    headers.put("X-Android-Fingerprint", sha1Hash);
+                }
                 return headers;
             }
         };

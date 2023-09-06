@@ -458,7 +458,11 @@ public class WoosmapSettingsCore {
         return BuildConfig.CORE_SDK_VERSION;
     }
 
+    private static String SHA1CertificateHash = "";
     protected static String getSHA1CertificateHash(Context context){
+        if (!SHA1CertificateHash.isEmpty()){
+            return SHA1CertificateHash;
+        }
         PackageManager pm = context.getPackageManager();
         String packageName = context.getPackageName();
         int flags = PackageManager.GET_SIGNATURES;
@@ -495,7 +499,8 @@ public class WoosmapSettingsCore {
         } catch (CertificateEncodingException e) {
             e.printStackTrace();
         }
-        return hexString;
+        SHA1CertificateHash = hexString;
+        return SHA1CertificateHash;
     }
 
     private static String byte2HexFormatted(byte[] arr) {

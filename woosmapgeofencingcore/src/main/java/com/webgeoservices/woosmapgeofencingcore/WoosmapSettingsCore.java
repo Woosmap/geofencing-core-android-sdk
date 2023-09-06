@@ -499,8 +499,10 @@ public class WoosmapSettingsCore {
         } catch (CertificateEncodingException e) {
             e.printStackTrace();
         }
-        SHA1CertificateHash = hexString;
-        return SHA1CertificateHash;
+        if (hexString!=null){
+            SHA1CertificateHash = hexString;
+        }
+        return hexString;
     }
 
     private static String byte2HexFormatted(byte[] arr) {

@@ -142,10 +142,12 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     }
 
     protected open fun checkIfPositionIsInsideGeofencingRegions(movingPosition: MovingPosition) {
-
+        Logger.getInstance().d("Checking geofence region for position: ${movingPosition.lat} , ${movingPosition.lng}")
         val regions = this.db.regionsDAO.getRegionCircle()
+        Logger.getInstance().d("Found ${regions.size} regions in db")
 
         regions.forEach {
+            Logger.getInstance().d("Checking if position ${movingPosition.lat} , ${movingPosition.lng} is inside region: ${it.identifier} with radius: ${it.radius}")
             val regionCenter = Location("woosmap")
             regionCenter.latitude = it.lat
             regionCenter.longitude = it.lng
@@ -155,8 +157,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             locationPosition.longitude = movingPosition.lng
 
             val isInside = locationPosition.distanceTo(regionCenter) < it.radius
+            Logger.getInstance().d("Is position inside region ${it.identifier} ? : $isInside")
 
             if (isInside != it.isCurrentPositionInside) {
+                Logger.getInstance().d("Position ${movingPosition.lat} , ${movingPosition.lng} entered inside a region. Updating region and creating regionLog.")
                 it.isCurrentPositionInside = isInside
                 it.dateTime = System.currentTimeMillis()
                 this.db.regionsDAO.updateRegion(it)
@@ -164,9 +168,15 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 val regionLog = saveRegionLogInDataBase(it, isInside)
                 if (WoosmapSettingsCore.modeHighFrequencyLocation || it.didEnter != isInside) {
                     if (woosmapProvider.regionLogReadyListener != null) {
+                        Logger.getInstance().d("Invoking regionLogReadyListener.RegionLogReadyCallback")
                         woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
                     }
                     insideGeofencingRegionDataListener?.insideGeofencingRegionData(regionLog,it,isInside,it.didEnter != isInside)
+                }
+                else{
+                    Logger.getInstance().d("WoosmapSettingsCore.modeHighFrequencyLocation: (${WoosmapSettingsCore.modeHighFrequencyLocation}) ")
+                    Logger.getInstance().d("Region.didEnter: (${it.didEnter}) ")
+                    Logger.getInstance().d("isInside: ($isInside) ")
                 }
             }
         }
@@ -599,6 +609,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         distanceWithTraffic: Boolean = false,
         parameters: Map<String, String> = emptyMap(),
     ) {
+        Logger.getInstance().d("Requesting Distance API")
         var requestUrl = WoosmapSettingsCore.DistanceAPIUrl
         if (distanceWithTraffic){
             requestUrl = WoosmapSettingsCore.DistanceAPIWithTrafficUrl
@@ -608,6 +619,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         }
 
         if (WoosmapSettingsCore.privateKeyWoosmapAPI.isEmpty()) {
+            Logger.getInstance().d("Private key is null. Skipping Distance API call")
             return
         }
 
@@ -671,7 +683,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 method,
             )
         }
-        Logger.getInstance().d("Requesting API: {$url}")
+        Logger.getInstance().d("Requesting Distance API: {$url}")
         val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
@@ -679,6 +691,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                     val gson = Gson()
                     val data = gson.fromJson(response, DistanceAPI::class.java)
                     val status = data.status
+                    Logger.getInstance().d("Distance API Returned status: $status")
                     if (status.contains("OK")) {
                         var distancesList: MutableList<Distance> = mutableListOf<Distance>()
                         for (row in data.rows) {
@@ -706,6 +719,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                             }
                         }
                         if (woosmapProvider.distanceReadyListener != null) {
+                            Logger.getInstance().d("Distance list size: ${distancesList.size}")
+                            Logger.getInstance().d("Invoking distanceReadyListener.DistanceReadyCallback")
                             woosmapProvider.distanceReadyListener.DistanceReadyCallback(
                                 distancesList.toTypedArray()
                             )

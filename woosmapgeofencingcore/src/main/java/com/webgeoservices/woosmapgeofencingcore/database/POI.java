@@ -35,7 +35,7 @@ public class POI {
     public String userProperties;
 
     public Map<String, Object> getUserPropertyMap(){
-        HashMap map = new HashMap<>();
+        HashMap map = new HashMap<String, Object>();
         if (userProperties!=null && !userProperties.isEmpty()){
             map = new Gson().fromJson(userProperties, map.getClass());
         }

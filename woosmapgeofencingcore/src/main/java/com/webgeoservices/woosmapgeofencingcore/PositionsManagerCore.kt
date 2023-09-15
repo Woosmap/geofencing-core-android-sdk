@@ -489,7 +489,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                                     searchAPIResponseItemCore.types.joinToString(" - ")
                                 POIaround.tags = searchAPIResponseItemCore.tags.joinToString(" - ")
                                 POIaround.countryCode = searchAPIResponseItemCore.countryCode
-                                POIaround.data = Gson().toJson(feature)
+                                POIaround.data = response
                                 if (feature.properties.userProperties!= null){
                                     POIaround.userProperties = Gson().toJson(feature.properties.userProperties)
                                 }

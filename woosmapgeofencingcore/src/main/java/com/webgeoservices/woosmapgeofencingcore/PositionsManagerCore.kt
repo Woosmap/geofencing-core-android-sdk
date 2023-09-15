@@ -166,6 +166,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 this.db.regionsDAO.updateRegion(it)
 
                 val regionLog = saveRegionLogInDataBase(it, isInside)
+                Logger.getInstance().d("Region log: ${regionLog.id} with event ${regionLog.eventName} created.")
                 if (WoosmapSettingsCore.modeHighFrequencyLocation || it.didEnter != isInside) {
                     if (woosmapProvider.regionLogReadyListener != null) {
                         Logger.getInstance().d("Invoking regionLogReadyListener.RegionLogReadyCallback")

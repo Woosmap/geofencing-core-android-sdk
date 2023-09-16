@@ -274,7 +274,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             if (lastVisit != null) {
                 this.visitsDetectionAlgo(lastVisit, location)
             } else {
-                Logger.getInstance().d("storeVisitData ($location): lastVisit is empty")
+                Logger.getInstance().d("storeVisitData for location (${location.latitude}, ${location.longitude}): lastVisit is empty. Creating a new visit.")
                 val staticLocation = Visit()
                 staticLocation.uuid = UUID.randomUUID().toString()
                 staticLocation.lat = location.latitude
@@ -769,6 +769,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         locationId: Int = 0,
         parameters: Map<String, String> = emptyMap()
     ): String {
+        Logger.getInstance().w("generateTrafficDistanceAPIURL: This method should no longer be invoked since it's deprecated.")
         var destination = ""
         listPosition.forEach {
             destination += it.first.toString() + "," + it.second.toString()
@@ -867,6 +868,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         locationId: Int = 0,
         parameters: Map<String, String> = emptyMap(),
     ) {
+        Logger.getInstance().w("trafficDistanceAPI: This method should not be invoked since its deprecated.")
         if (requestQueue == null) {
             requestQueue = Volley.newRequestQueue(this.context)
         }

@@ -322,6 +322,9 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
 
     }
     protected fun detectVisitInZOIClassifiedHelper(){
+        Logger.getInstance().d("Determining visits inside zois")
+
+        Logger.getInstance().d("Getting HOME and WORK zois from db.")
         val ZOIsClassified = this.db.zoIsDAO.getWorkHomeZOI()
 
         val lastVisitLocation = Location("lastVisit")
@@ -332,19 +335,31 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             lastVisitLocation.longitude = temporaryCurrentVisits.first().lng
             didEnter = true
         }
+        else{
+            Logger.getInstance().d("Ongoing visits are empty.")
+        }
 
         if (!temporaryFinishedVisits.isEmpty()) {
             lastVisitLocation.latitude = temporaryFinishedVisits.first().lat
             lastVisitLocation.longitude = temporaryFinishedVisits.first().lng
             didEnter = false
         }
+        else{
+            Logger.getInstance().d("Finished visits are empty.")
+        }
+
+        Logger.getInstance().d("lastVisitLocation is: ${lastVisitLocation.latitude}, ${lastVisitLocation.longitude}")
 
         for (zoi in ZOIsClassified) {
             val zoiCenterLocation = Location("zoiCenter")
             zoiCenterLocation.latitude = SphericalMercator.y2lat(zoi.lngMean)
             zoiCenterLocation.longitude = SphericalMercator.x2lon(zoi.latMean)
+            Logger.getInstance().d("Checking is lastVisitLocation is inside zoi: ${zoi.uuid}")
+            Logger.getInstance().d("zoi center is: ${zoiCenterLocation.latitude}, ${zoiCenterLocation.longitude}")
             val distance = zoiCenterLocation.distanceTo(lastVisitLocation)
+            Logger.getInstance().d("Distance between lastVisitLocation and zoi ${zoi.uuid} is: $distance")
             if (distance < WoosmapSettingsCore.radiusDetectionClassifiedZOI) {
+                Logger.getInstance().d("distance($distance) < WoosmapSettingsCore.radiusDetectionClassifiedZOI(${WoosmapSettingsCore.radiusDetectionClassifiedZOI}). A new region log needs to be created.")
                 var regionLog = RegionLog()
                 regionLog.identifier = zoi.period
                 regionLog.dateTime = System.currentTimeMillis()
@@ -358,13 +373,19 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                     regionLog.eventName="woos_zoi_classified_exited_event"
                 }
                 regionLog=getRegionLogWithDurationLog(regionLog,didEnter)
+                Logger.getInstance().d("Creating region log with event ${regionLog.eventName} and duration ${regionLog.duration}.")
                 this.db.regionLogsDAO.createRegionLog(regionLog)
+                Logger.getInstance().d("Region log created.")
 
                 if (woosmapProvider.regionLogReadyListener != null) {
+                    Logger.getInstance().d("Invoking regionLogReadyListener.RegionLogReadyCallback")
                     woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
                 }
                 visitInZOIClassifiedDataListener?.visitInZOIClassifiedData(regionLog)
 
+            }
+            else{
+                Logger.getInstance().d("distance($distance) >= WoosmapSettingsCore.radiusDetectionClassifiedZOI(${WoosmapSettingsCore.radiusDetectionClassifiedZOI}). Skipping region log creation.")
             }
         }
     }

@@ -14,6 +14,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.webgeoservices.woosmapgeofencingcore.database.WoosmapDb;
+import com.webgeoservices.woosmapgeofencingcore.logging.Logger;
 
 public abstract class LocationManagerProvider {
     protected final Context context;
@@ -74,7 +75,7 @@ public abstract class LocationManagerProvider {
             mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                     mLocationCallback, null);//Looper.myLooper());
         } catch (SecurityException e) {
-            Log.e(WoosmapSettingsCore.WoosmapSdkTag, "security exception");
+            Logger.getInstance().e("security exception: " + e, e);
         }
     }
 
@@ -100,7 +101,7 @@ public abstract class LocationManagerProvider {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
             mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationIntent);
         } catch (SecurityException e) {
-            Log.e(WoosmapSettingsCore.WoosmapSdkTag, "security exception");
+            Logger.getInstance().e("security exception: " + e, e);
         }
     }
 
@@ -113,7 +114,7 @@ public abstract class LocationManagerProvider {
                 mFusedLocationClient.removeLocationUpdates(mLocationCallback);
             }
         } catch (SecurityException e) {
-            Log.e(WoosmapSettingsCore.WoosmapSdkTag, "security exception");
+            Logger.getInstance().e("security exception: " + e, e);
         }
     }
 

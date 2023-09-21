@@ -18,6 +18,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.webgeoservices.woosmapgeofencingcore.database.Region;
+import com.webgeoservices.woosmapgeofencingcore.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +67,7 @@ class LocationManagerCore extends LocationManagerProvider{
     @SuppressLint("MissingPermission")
     @Override
     public void setMonitoringRegions() {
-        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Geofence Add on Reboot");
+        Logger.getInstance().d("Geofence Add on Reboot");
         mGeofencingClient.removeGeofences(getGeofencePendingIntent());
         Region[] regions = db.getRegionsDAO().getAllRegions();
         for (Region regionToAdd : regions) {
@@ -76,14 +77,14 @@ class LocationManagerCore extends LocationManagerProvider{
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onSuccess: Geofence Added...");
+                            Logger.getInstance().d("onSuccess: Geofence Added...");
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             String errorMessage = geofenceHelper.getErrorString(e);
-                            Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure " + errorMessage);
+                            Logger.getInstance().e("onFailure: " + errorMessage);
                         }
                     });
         }
@@ -98,7 +99,7 @@ class LocationManagerCore extends LocationManagerProvider{
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 Location currentLocation = locationResult.getLastLocation();
-                Log.d("WoosmapSdk", currentLocation.toString());
+                Logger.getInstance().d("createLocationCallback: " + currentLocation);
 
                 List<Location> listLocations = new ArrayList<Location>();
                 listLocations.add(currentLocation);

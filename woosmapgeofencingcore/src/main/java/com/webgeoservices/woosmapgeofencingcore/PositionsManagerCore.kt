@@ -17,6 +17,7 @@ import com.webgeoservices.woosmapgeofencingcore.DistanceAPIDataModel.DistanceAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPI
 import com.webgeoservices.woosmapgeofencingcore.SearchAPIDataModel.SearchAPIResponseItemCore
 import com.webgeoservices.woosmapgeofencingcore.database.*
+import com.webgeoservices.woosmapgeofencingcore.logging.Logger
 import java.util.*
 
 open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider: WoosmapProvider) {
@@ -28,7 +29,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     protected var requestQueue: RequestQueue? = null
 
     protected open fun visitsDetectionAlgo(lastVisit: Visit, location: Location) {
-        Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "get New Location")
+        Logger.getInstance().d("Visit detection for: $location")
         val lastVisitLocation = Location("Woosmap")
         lastVisitLocation.latitude = lastVisit.lat
         lastVisitLocation.longitude = lastVisit.lng
@@ -51,14 +52,14 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }
                 lastVisit.nbPoint += 1
                 this.db.visitsDao.updateStaticPosition(lastVisit)
-                Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "Always Static")
+                Logger.getInstance().d("Visit detection : last visit $lastVisit is active")
             }
             //Visit out
             else {
                 //Close the current visit
                 lastVisit.endTime = location.time
                 this.finishVisit(lastVisit)
-                Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "Not static Anyway")
+                Logger.getInstance().d("Visit detection : close visit $lastVisit")
             }
         }
         //not visit in progress
@@ -66,11 +67,12 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             val previousMovingPosition = this.db.movingPositionsDao.lastMovingPosition
             var distance = 0.0F;
             if (previousMovingPosition != null) {
+                Logger.getInstance().d("Visit detection: previousMovingPosition is not null")
                 distance = this.distanceBetweenLocationAndPosition(previousMovingPosition, location)
             }
-            Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "distance : $distance")
+            Logger.getInstance().d("Visit detection: distanceBetweenLocationAndPosition: $distance")
             if (distance >= WoosmapSettingsCore.distanceDetectionThresholdVisits) {
-                Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "We're Moving")
+                Logger.getInstance().d("Visit detection: distance >= WoosmapSettingsCore.distanceDetectionThresholdVisits: User is on the move")
             } else { //Create a new visit
                 val olderPosition = this.db.movingPositionsDao.previousLastMovingPosition
                 if (olderPosition != null) {
@@ -87,7 +89,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                         visit.endTime = 0
                         visit.nbPoint = 1
                         this.createVisit(visit)
-                        Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "Create new Visit")
+                        Logger.getInstance().d("Visit detection: Create new Visit")
                     }
                 }
             }
@@ -98,7 +100,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         val previousMovingPosition = this.db.movingPositionsDao.lastMovingPosition
             ?: this.createMovingPositionFromLocation(location)
         val distance = this.distanceBetweenLocationAndPosition(previousMovingPosition, location)
-        Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "distance : " + distance.toString())
+        Logger.getInstance().d("distanceBetweenLocationAndPosition: $distance" )
         if (distance >= WoosmapSettingsCore.currentLocationDistanceFilter) {
             this.createMovingPositionFromLocation(location)
         }
@@ -140,10 +142,12 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     }
 
     protected open fun checkIfPositionIsInsideGeofencingRegions(movingPosition: MovingPosition) {
-
+        Logger.getInstance().d("Checking geofence region for position: ${movingPosition.lat} , ${movingPosition.lng}")
         val regions = this.db.regionsDAO.getRegionCircle()
+        Logger.getInstance().d("Found ${regions.size} regions in db")
 
         regions.forEach {
+            Logger.getInstance().d("Checking if position ${movingPosition.lat} , ${movingPosition.lng} is inside region: ${it.identifier} with radius: ${it.radius}")
             val regionCenter = Location("woosmap")
             regionCenter.latitude = it.lat
             regionCenter.longitude = it.lng
@@ -153,18 +157,27 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             locationPosition.longitude = movingPosition.lng
 
             val isInside = locationPosition.distanceTo(regionCenter) < it.radius
+            Logger.getInstance().d("Is position inside region ${it.identifier} ? : $isInside")
 
             if (isInside != it.isCurrentPositionInside) {
+                Logger.getInstance().d("Position ${movingPosition.lat} , ${movingPosition.lng} entered inside a region. Updating region and creating regionLog.")
                 it.isCurrentPositionInside = isInside
                 it.dateTime = System.currentTimeMillis()
                 this.db.regionsDAO.updateRegion(it)
 
                 val regionLog = saveRegionLogInDataBase(it, isInside)
+                Logger.getInstance().d("Region log: ${regionLog.id} with event ${regionLog.eventName} created.")
                 if (WoosmapSettingsCore.modeHighFrequencyLocation || it.didEnter != isInside) {
                     if (woosmapProvider.regionLogReadyListener != null) {
+                        Logger.getInstance().d("Invoking regionLogReadyListener.RegionLogReadyCallback")
                         woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
                     }
                     insideGeofencingRegionDataListener?.insideGeofencingRegionData(regionLog,it,isInside,it.didEnter != isInside)
+                }
+                else{
+                    Logger.getInstance().d("WoosmapSettingsCore.modeHighFrequencyLocation: (${WoosmapSettingsCore.modeHighFrequencyLocation}) ")
+                    Logger.getInstance().d("Region.didEnter: (${it.didEnter}) ")
+                    Logger.getInstance().d("isInside: ($isInside) ")
                 }
             }
         }
@@ -243,7 +256,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     }
 
     open fun manageLocation(location: Location) {
-        Log.d(WoosmapSettingsCore.WoosmapVisitsTag, location.toString())
+        Logger.getInstance().d("manageLocation: $location")
         storeVisitData(location)
         addPositionFromLocation(location)
     }
@@ -261,7 +274,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             if (lastVisit != null) {
                 this.visitsDetectionAlgo(lastVisit, location)
             } else {
-                Log.d(WoosmapSettingsCore.WoosmapVisitsTag, "Empty")
+                Logger.getInstance().d("storeVisitData for location (${location.latitude}, ${location.longitude}): lastVisit is empty. Creating a new visit.")
                 val staticLocation = Visit()
                 staticLocation.uuid = UUID.randomUUID().toString()
                 staticLocation.lat = location.latitude
@@ -296,7 +309,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 detectVisitInZOIClassified()
 
             } catch (e: Exception) {
-                Log.e(WoosmapSettingsCore.WoosmapVisitsTag, e.toString())
+                Logger.getInstance().e("Error: $e", e)
             }
         }.start()
     }
@@ -309,6 +322,9 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
 
     }
     protected fun detectVisitInZOIClassifiedHelper(){
+        Logger.getInstance().d("Determining visits inside zois")
+
+        Logger.getInstance().d("Getting HOME and WORK zois from db.")
         val ZOIsClassified = this.db.zoIsDAO.getWorkHomeZOI()
 
         val lastVisitLocation = Location("lastVisit")
@@ -319,19 +335,31 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             lastVisitLocation.longitude = temporaryCurrentVisits.first().lng
             didEnter = true
         }
+        else{
+            Logger.getInstance().d("Ongoing visits are empty.")
+        }
 
         if (!temporaryFinishedVisits.isEmpty()) {
             lastVisitLocation.latitude = temporaryFinishedVisits.first().lat
             lastVisitLocation.longitude = temporaryFinishedVisits.first().lng
             didEnter = false
         }
+        else{
+            Logger.getInstance().d("Finished visits are empty.")
+        }
+
+        Logger.getInstance().d("lastVisitLocation is: ${lastVisitLocation.latitude}, ${lastVisitLocation.longitude}")
 
         for (zoi in ZOIsClassified) {
             val zoiCenterLocation = Location("zoiCenter")
             zoiCenterLocation.latitude = SphericalMercator.y2lat(zoi.lngMean)
             zoiCenterLocation.longitude = SphericalMercator.x2lon(zoi.latMean)
+            Logger.getInstance().d("Checking is lastVisitLocation is inside zoi: ${zoi.uuid}")
+            Logger.getInstance().d("zoi center is: ${zoiCenterLocation.latitude}, ${zoiCenterLocation.longitude}")
             val distance = zoiCenterLocation.distanceTo(lastVisitLocation)
+            Logger.getInstance().d("Distance between lastVisitLocation and zoi ${zoi.uuid} is: $distance")
             if (distance < WoosmapSettingsCore.radiusDetectionClassifiedZOI) {
+                Logger.getInstance().d("distance($distance) < WoosmapSettingsCore.radiusDetectionClassifiedZOI(${WoosmapSettingsCore.radiusDetectionClassifiedZOI}). A new region log needs to be created.")
                 var regionLog = RegionLog()
                 regionLog.identifier = zoi.period
                 regionLog.dateTime = System.currentTimeMillis()
@@ -345,13 +373,19 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                     regionLog.eventName="woos_zoi_classified_exited_event"
                 }
                 regionLog=getRegionLogWithDurationLog(regionLog,didEnter)
+                Logger.getInstance().d("Creating region log with event ${regionLog.eventName} and duration ${regionLog.duration}.")
                 this.db.regionLogsDAO.createRegionLog(regionLog)
+                Logger.getInstance().d("Region log created.")
 
                 if (woosmapProvider.regionLogReadyListener != null) {
+                    Logger.getInstance().d("Invoking regionLogReadyListener.RegionLogReadyCallback")
                     woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
                 }
                 visitInZOIClassifiedDataListener?.visitInZOIClassifiedData(regionLog)
 
+            }
+            else{
+                Logger.getInstance().d("distance($distance) >= WoosmapSettingsCore.radiusDetectionClassifiedZOI(${WoosmapSettingsCore.radiusDetectionClassifiedZOI}). Skipping region log creation.")
             }
         }
     }
@@ -413,6 +447,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             destination,
             WoosmapSettingsCore.privateKeyWoosmapAPI
         )
+        Logger.getInstance().d("Calling Distance API: $url")
         val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
@@ -437,7 +472,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
+                Logger.getInstance().e("Distance API: $error ")
             }
         )
         requestQueue?.add(req)
@@ -462,6 +497,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         }
 
         val url = getStoreAPIUrl(lat, lng)
+        Logger.getInstance().d("Calling Search API: $url")
         val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
@@ -506,7 +542,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " search API")
+                Logger.getInstance().e("Search API: $error")
             }
         )
         requestQueue?.add(req)
@@ -569,9 +605,9 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     ){
         var shouldUseTraffic = distanceWithTraffic
         if (parameters.containsKey("distanceProvider")) {
-            Log.w(WoosmapSettingsCore.WoosmapSdkTag,
-                "`distanceProvider` property is now deprecated. Woosmap Distance API will always be used as the provider. " +
-                        "To use traffic data pass `distanceWithTraffic = true` to `calculateDistance` method")
+            Logger.getInstance().w("`distanceProvider` property is now deprecated. Woosmap Distance API will always be used as the provider. " +
+                    "To use traffic data pass `distanceWithTraffic = true` to `calculateDistance` method")
+
             var provider = parameters.get("distanceProvider")
 
             //For backward compatibility is a client is setting distanceProvider as woosmapTraffic then send distanceWithTraffic as true
@@ -598,6 +634,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         distanceWithTraffic: Boolean = false,
         parameters: Map<String, String> = emptyMap(),
     ) {
+        Logger.getInstance().d("Requesting Distance API")
         var requestUrl = WoosmapSettingsCore.DistanceAPIUrl
         if (distanceWithTraffic){
             requestUrl = WoosmapSettingsCore.DistanceAPIWithTrafficUrl
@@ -607,6 +644,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         }
 
         if (WoosmapSettingsCore.privateKeyWoosmapAPI.isEmpty()) {
+            Logger.getInstance().d("Private key is null. Skipping Distance API call")
             return
         }
 
@@ -670,6 +708,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 method,
             )
         }
+        Logger.getInstance().d("Requesting Distance API: {$url}")
         val req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
@@ -677,6 +716,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                     val gson = Gson()
                     val data = gson.fromJson(response, DistanceAPI::class.java)
                     val status = data.status
+                    Logger.getInstance().d("Distance API Returned status: $status")
                     if (status.contains("OK")) {
                         var distancesList: MutableList<Distance> = mutableListOf<Distance>()
                         for (row in data.rows) {
@@ -704,6 +744,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                             }
                         }
                         if (woosmapProvider.distanceReadyListener != null) {
+                            Logger.getInstance().d("Distance list size: ${distancesList.size}")
+                            Logger.getInstance().d("Invoking distanceReadyListener.DistanceReadyCallback")
                             woosmapProvider.distanceReadyListener.DistanceReadyCallback(
                                 distancesList.toTypedArray()
                             )
@@ -711,7 +753,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                         distanceApiResponseListener?.distanceApiData(data, distancesList)
 
                     } else {
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Distance API " + status)
+                        Logger.getInstance().e("Distance API status: $status")
                     }
                     if (locationId != 0 && status.contains("OK") && data.rows.get(0).elements.get(0).status.contains(
                             "OK"
@@ -729,7 +771,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
+                Logger.getInstance().e("Distance API Error: $error")
             }
         )
         requestQueue?.add(req)
@@ -751,6 +793,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         locationId: Int = 0,
         parameters: Map<String, String> = emptyMap()
     ): String {
+        Logger.getInstance().w("generateTrafficDistanceAPIURL: This method should no longer be invoked since it's deprecated.")
         var destination = ""
         listPosition.forEach {
             destination += it.first.toString() + "," + it.second.toString()
@@ -849,6 +892,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         locationId: Int = 0,
         parameters: Map<String, String> = emptyMap(),
     ) {
+        Logger.getInstance().w("trafficDistanceAPI: This method should not be invoked since its deprecated.")
         if (requestQueue == null) {
             requestQueue = Volley.newRequestQueue(this.context)
         }
@@ -863,6 +907,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             locationId,
             parameters
         )
+        Logger.getInstance().d("Calling Distance API: $url")
         var req = APIHelperCore.getInstance(context).createGetReuqest(
             url,
             { response ->
@@ -886,14 +931,14 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                         trafficApiResponseListener?.trafficApiData(data, distancesList)
 
                     } else {
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Distance API " + status)
+                        Logger.getInstance().e("Distance API Status: $status")
                     }
                     updatePoiFromTrafficAPI(locationId, status, data)
 
                 }.start()
             },
             { error ->
-                Log.e(WoosmapSettingsCore.WoosmapSdkTag, error.toString() + " Distance API")
+                Logger.getInstance().e("Distance API: $error")
             }
         )
         requestQueue?.add(req)
@@ -1089,7 +1134,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         Thread {
             val region = this.db.regionsDAO.getRegionFromId(id)
             if (region != null) {
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Region already exist")
+                Logger.getInstance().d("Region {$id} already exist")
             } else {
                 createRegion(id, radius.toDouble(), latitude, longitude, idStore)
             }
@@ -1097,11 +1142,11 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
 
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
             addOnSuccessListener {
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onSuccess: Geofence Added...")
+                Logger.getInstance().d("onSuccess: Geofence Added...")
             }
             addOnFailureListener {
                 val errorMessage = geofenceHelper.getErrorString(exception)
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure " + errorMessage)
+                Logger.getInstance().e("onFailure: $errorMessage")
             }
         }
     }
@@ -1131,25 +1176,22 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         Thread {
             val regionOld = this.db.regionsDAO.getRegionFromId(oldId)
             if (regionOld == null) {
-                Log.d(
-                    WoosmapSettingsCore.WoosmapSdkTag,
-                    "Region to replace not exist id = " + oldId
-                )
+                Logger.getInstance().d("Region to replace not exist id = $oldId")
             } else {
                 this.db.regionsDAO.deleteRegionFromId(oldId)
             }
             val regionNew = this.db.regionsDAO.getRegionFromId(newId)
             if (regionNew != null) {
-                Log.d(WoosmapSettingsCore.WoosmapSdkTag, "Region already exist id = " + newId)
+                Logger.getInstance().d("Region already exist id = $newId")
             } else {
                 this.db.regionsDAO.createRegion(region)
                 mGeofencingClient.addGeofences(geofencingRequest, GeofencePendingIntent).run {
                     addOnSuccessListener {
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onSuccess: Geofence Added...")
+                        Logger.getInstance().d("onSuccess: Geofence Added...")
                     }
                     addOnFailureListener {
                         val errorMessage = geofenceHelper.getErrorString(exception)
-                        Log.d(WoosmapSettingsCore.WoosmapSdkTag, "onFailure " + errorMessage)
+                        Logger.getInstance().e("onFailure: $errorMessage")
                     }
                 }
             }

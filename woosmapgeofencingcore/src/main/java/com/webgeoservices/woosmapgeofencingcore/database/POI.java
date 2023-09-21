@@ -3,6 +3,11 @@ package com.webgeoservices.woosmapgeofencingcore.database;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.Map;
+
 @Entity(tableName = "POI")
 
 public class POI {
@@ -29,5 +34,12 @@ public class POI {
     public boolean openNow;
     public String userProperties;
 
+    public Map<String, Object> getUserPropertyMap(){
+        HashMap map = new HashMap<String, Object>();
+        if (userProperties!=null && !userProperties.isEmpty()){
+            map = new Gson().fromJson(userProperties, map.getClass());
+        }
+        return map;
+    }
 }
 

@@ -526,6 +526,9 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                                 POIaround.tags = searchAPIResponseItemCore.tags.joinToString(" - ")
                                 POIaround.countryCode = searchAPIResponseItemCore.countryCode
                                 POIaround.data = response
+                                if (feature.properties.userProperties!= null){
+                                    POIaround.userProperties = Gson().toJson(feature.properties.userProperties)
+                                }
 
                                 this.db.poIsDAO.createPOI(POIaround)
                                 if (woosmapProvider.searchAPIReadyListener != null) {

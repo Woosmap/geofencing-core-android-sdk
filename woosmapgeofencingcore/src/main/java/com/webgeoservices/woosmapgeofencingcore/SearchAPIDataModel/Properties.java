@@ -7,7 +7,7 @@ public class Properties {
     private String name;
     private Object contact;
     private Address address;
-    private HashMap<String, String> user_properties;
+    private HashMap<String, Object> user_properties;
     private Object[] tags;
     private Object[] types;
     private Double distance;
@@ -46,11 +46,11 @@ public class Properties {
         this.address = value;
     }
 
-    public HashMap<String, String> getUserProperties() {
+    public HashMap<String, Object> getUserProperties() {
         return user_properties;
     }
 
-    public void setUserProperties(HashMap<String, String> value) {
+    public void setUserProperties(HashMap<String, Object> value) {
         this.user_properties = value;
     }
 

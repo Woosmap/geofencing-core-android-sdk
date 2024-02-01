@@ -502,42 +502,37 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             url,
             { response ->
                 Thread {
-                    assert(response != null)
-                    val gsonObject = Gson().fromJson(response.toString(), Object::class.java)
-                    if (!(gsonObject as LinkedTreeMap<String, Object>).containsKey("error_message")) {
-                        var responseObject = Gson().fromJson(response.toString(), SearchAPI::class.java)
-                        for (feature in responseObject.features){
-                            var searchAPIResponseItemCore = SearchAPIResponseItemCore.fromFeature(feature)
-                            if(searchAPIResponseItemCore != null) {
-                                val POIaround = POI()
-                                POIaround.city = searchAPIResponseItemCore.city
-                                POIaround.zipCode = searchAPIResponseItemCore.zipCode
-                                POIaround.dateTime = System.currentTimeMillis()
-                                POIaround.distance = searchAPIResponseItemCore.distance
-                                POIaround.locationId = positionId
-                                POIaround.idStore = searchAPIResponseItemCore.idstore
-                                POIaround.name = searchAPIResponseItemCore.name
-                                POIaround.lat = searchAPIResponseItemCore.geometry.location.lat
-                                POIaround.lng = searchAPIResponseItemCore.geometry.location.lng
-                                POIaround.address = searchAPIResponseItemCore.formattedAddress
-                                POIaround.contact = searchAPIResponseItemCore.contact
-                                POIaround.types =
-                                    searchAPIResponseItemCore.types.joinToString(" - ")
-                                POIaround.tags = searchAPIResponseItemCore.tags.joinToString(" - ")
-                                POIaround.countryCode = searchAPIResponseItemCore.countryCode
-                                POIaround.data = response
-                                if (feature.properties.userProperties!= null){
-                                    POIaround.userProperties = Gson().toJson(feature.properties.userProperties)
-                                }
+                    try{
 
-                                this.db.poIsDAO.createPOI(POIaround)
-                                if (woosmapProvider.searchAPIReadyListener != null) {
-                                    woosmapProvider.searchAPIReadyListener.SearchAPIReadyCallback(
-                                        POIaround
-                                    )
+                        assert(response != null)
+                        val gsonObject = Gson().fromJson(response.toString(), Object::class.java)
+                        if (!(gsonObject as LinkedTreeMap<String, Object>).containsKey("error_message")) {
+                            var features:ArrayList<LinkedTreeMap<String, Any>> = gsonObject["features"] as ArrayList<LinkedTreeMap<String, Any>>
+                            Logger.getInstance().d("API returned with status 200 and features count: ${features.size}")
+                            Logger.getInstance().d("Creating POIs from API response")
+                            for(featureObject in features){
+                                try{
+                                    var POIaround = Util.getPOIFromFeature(featureObject, positionId, response)
+                                    if (POIaround != null) {
+                                        this.db.poIsDAO.createPOI(POIaround)
+                                        if (woosmapProvider.searchAPIReadyListener != null) {
+                                            woosmapProvider.searchAPIReadyListener.SearchAPIReadyCallback(
+                                                POIaround
+                                            )
+                                        }
+                                    }
+                                }
+                                catch (ex: java.lang.Exception){
+                                    Logger.getInstance().e(ex.toString())
                                 }
                             }
                         }
+                        else{
+                            Logger.getInstance().e("Search API Error: $response")
+                        }
+                    }
+                    catch (ex: java.lang.Exception){
+                        Logger.getInstance().e(ex.toString())
                     }
                 }.start()
             },

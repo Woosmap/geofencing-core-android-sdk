@@ -1055,7 +1055,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         Thread {
             val regionDetected =
                 this.db.regionsDAO.getRegionFromId(geofenceIdentifier) ?: return@Thread
-           didEventRegionHelper(transition,regionDetected)
+            didEventRegionHelper(transition,regionDetected)
 
         }.start()
     }

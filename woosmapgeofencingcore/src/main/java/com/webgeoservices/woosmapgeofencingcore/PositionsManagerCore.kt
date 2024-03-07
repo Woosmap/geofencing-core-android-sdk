@@ -445,7 +445,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             positon.lat,
             positon.lng,
             destination,
-            WoosmapSettingsCore.privateKeyWoosmapAPI
+            WoosmapSettingsCore.privateKeyWoosmapAPI,
+            WoosmapSettingsCore.getDistanceMethod(),
         )
         Logger.getInstance().d("Calling Distance API: $url")
         val req = APIHelperCore.getInstance(context).createGetReuqest(

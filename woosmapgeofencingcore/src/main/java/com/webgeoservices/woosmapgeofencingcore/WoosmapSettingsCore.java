@@ -205,7 +205,7 @@ public class WoosmapSettingsCore {
 
 
     //Enable/disable DistanceAPI
-    static public boolean distanceAPIEnable = true;
+    static public boolean distanceAPIEnable = false;
 
 
     //Mode transportation DistanceAPI

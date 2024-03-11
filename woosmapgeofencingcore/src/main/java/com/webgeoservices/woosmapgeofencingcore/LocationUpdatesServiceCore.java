@@ -3,6 +3,7 @@ package com.webgeoservices.woosmapgeofencingcore;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -109,6 +110,7 @@ public class LocationUpdatesServiceCore extends BaseLocationUpdateService {
         super.onDestroy();
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void enableLocationBackground(boolean enable) {
         Log.i(TAG, "enableLocationBackground");

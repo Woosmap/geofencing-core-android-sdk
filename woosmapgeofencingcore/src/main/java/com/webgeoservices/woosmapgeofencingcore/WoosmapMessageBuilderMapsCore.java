@@ -2,6 +2,7 @@ package com.webgeoservices.woosmapgeofencingcore;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -358,6 +359,7 @@ public class WoosmapMessageBuilderMapsCore {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void getLatestLocation(Context context, OnSuccessListener<Location> successListener) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Logger.getInstance().w("No location permission");

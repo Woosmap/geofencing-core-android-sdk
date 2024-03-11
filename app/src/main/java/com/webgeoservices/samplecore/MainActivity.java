@@ -10,6 +10,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -183,7 +184,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     };
 
-
     public void createNotification(String title, String body) {
         final int NOTIFY_ID = 1002;
 
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
             intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+            pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
             builder.setContentTitle(title)                           // required
                     .setSmallIcon(android.R.drawable.ic_popup_reminder) // required

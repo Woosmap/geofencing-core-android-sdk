@@ -15,6 +15,10 @@ android {
         multiDexEnabled true
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
     buildTypes {
         release {
             buildConfigField "String", "CORE_SDK_VERSION", "\"" + VERSION_NAME + "\""
@@ -50,7 +54,7 @@ dependencies {
     implementation "androidx.core:core-ktx:1.12.0"
 
     implementation 'com.google.guava:guava:30.1.1-jre'
-    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'com.google.code.gson:gson:2.10'
     implementation 'org.ojalgo:ojalgo:37.1.1'
     implementation 'com.google.android.gms:play-services-location:21.2.0'
     implementation 'com.android.volley:volley:1.2.1'

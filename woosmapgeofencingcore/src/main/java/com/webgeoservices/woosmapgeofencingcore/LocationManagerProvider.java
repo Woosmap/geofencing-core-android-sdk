@@ -1,6 +1,5 @@
 package com.webgeoservices.woosmapgeofencingcore;
 
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -58,7 +57,6 @@ public abstract class LocationManagerProvider {
         mLocationRequest = new LocationRequest();
     }
 
-    @SuppressLint("MissingPermission")
     public void updateLocationForeground() {
         if (mLocationRequest == null) {
             this.setmLocationRequest();
@@ -81,7 +79,6 @@ public abstract class LocationManagerProvider {
         }
     }
 
-    @SuppressLint("MissingPermission")
     public void updateLocationBackground() {
         if (WoosmapSettingsCore.foregroundLocationServiceEnable) {
             mFusedLocationClient.removeLocationUpdates(mLocationIntent);

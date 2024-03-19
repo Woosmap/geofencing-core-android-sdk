@@ -51,7 +51,7 @@ dependencies {
     implementation 'androidx.room:room-guava:2.6.1'
     implementation 'com.google.android.gms:play-services-location:21.2.0'
     implementation 'com.google.android.gms:play-services-maps:18.2.0'
-    implementation 'com.google.maps.android:android-maps-utils:2.2.5'
+    implementation 'com.google.maps.android:android-maps-utils:3.8.2'
     implementation 'androidx.multidex:multidex:2.0.1'
 
 }

@@ -10,10 +10,11 @@ import androidx.room.Update;
 @Dao
 public abstract class POIsDAO {
 
-    public void createPOI(POI poi){
+    public boolean createPOI(POI poi){
         POI existingPOI = getPOIbyStoreId(poi.idStore);
         if (existingPOI == null){
             createNewPOI(poi);
+            return true;
         }
         else{
             existingPOI.address = poi.address;
@@ -37,6 +38,7 @@ public abstract class POIsDAO {
             existingPOI.lng = poi.lng;
             existingPOI.openNow = poi.openNow;
             updatePOI(existingPOI);
+            return false;
         }
     }
 

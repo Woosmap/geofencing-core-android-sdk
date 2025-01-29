@@ -25,4 +25,5 @@ public class RegionLog {
     public float expectedAverageSpeed=-1f;
     public String eventName="";
     public long spentTime = 0;
+    public long addedOn;
 }

@@ -208,7 +208,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             regionLog.eventName = "woos_geofence_exited_event"
         }
         regionLog=getRegionLogWithDurationLog(regionLog,isInside)
+        regionLog.addedOn = System.currentTimeMillis()
         this.db.regionLogsDAO.createRegionLog(regionLog)
+        Utils.sendRegionRecordEnteredBroadcast(regionLog, context)
+
         return regionLog
     }
     protected fun getRegionLogWithDurationLog(regionLog: RegionLog,isInsideGeofence : Boolean) :RegionLog {
@@ -374,7 +377,9 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                 }
                 regionLog=getRegionLogWithDurationLog(regionLog,didEnter)
                 Logger.getInstance().d("Creating region log with event ${regionLog.eventName} and duration ${regionLog.duration}.")
+                regionLog.addedOn = System.currentTimeMillis()
                 this.db.regionLogsDAO.createRegionLog(regionLog)
+                Utils.sendRegionRecordEnteredBroadcast(regionLog, context)
                 Logger.getInstance().d("Region log created.")
 
                 if (woosmapProvider.regionLogReadyListener != null) {
@@ -1096,7 +1101,9 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             regionLog.isCurrentPositionInside = regionDetected.didEnter
             regionDetected.isCurrentPositionInside = regionDetected.didEnter
 
+            regionLog.addedOn = System.currentTimeMillis()
             this.db.regionLogsDAO.createRegionLog(regionLog)
+            Utils.sendRegionRecordEnteredBroadcast(regionLog, context)
 
             regionDetected.dateTime = System.currentTimeMillis()
             this.db.regionsDAO.updateRegion(regionDetected)
@@ -1106,7 +1113,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             }
             eventRegionDataListener?.eventRegionData(regionDetected,regionLog)
         } else {
+            regionLog.addedOn = System.currentTimeMillis()
             this.db.regionLogsDAO.createRegionLog(regionLog)
+            Utils.sendRegionRecordEnteredBroadcast(regionLog, context)
+
             regionDetected.dateTime = System.currentTimeMillis()
             this.db.regionsDAO.updateRegion(regionDetected)
         }

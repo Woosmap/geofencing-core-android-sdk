@@ -8,6 +8,16 @@ plugins {
     id 'com.android.application' version '8.3.0' apply false
     id 'com.android.library' version '8.3.0' apply false
     id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
+    id "org.owasp.dependencycheck" version "12.1.0"
+}
+
+allprojects {
+    apply plugin: "org.owasp.dependencycheck"
+    dependencyCheck {
+        failBuildOnCVSS = 7
+        analyzers.assemblyEnabled
+        scanConfigurations = ['releaseRuntimeClasspath']
+    }
 }
 
 task clean(type: Delete) {

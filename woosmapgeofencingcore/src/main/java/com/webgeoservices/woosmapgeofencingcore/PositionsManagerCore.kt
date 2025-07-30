@@ -531,6 +531,10 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                                     POIaround.userProperties = Gson().toJson(feature.properties.userProperties)
                                 }
 
+                                if (feature.properties.openingHours!= null){
+                                    POIaround.openingHours = Gson().toJson(feature.properties.openingHours)
+                                }
+
                                 this.db.poIsDAO.createPOI(POIaround)
                                 if (woosmapProvider.searchAPIReadyListener != null) {
                                     woosmapProvider.searchAPIReadyListener.SearchAPIReadyCallback(

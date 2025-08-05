@@ -141,7 +141,7 @@ jobs:
           env:
             SDK_VERSION: ${{ needs.Versioning.outputs.version }}
           run: |
-            sed -i "s/^VERSION_NAME=.*/VERSION_NAME=$SDK_VERSION/" gradle.properties
+            sed -i "s/^VERSION_NAME=.*/VERSION_NAME=core_geofence_$SDK_VERSION/" gradle.properties
             
         
         - name: Commit and push changes

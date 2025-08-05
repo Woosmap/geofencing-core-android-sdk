@@ -176,8 +176,23 @@ public class SearchAPIResponseItemCore implements Parcelable {
                 detailsResponseItem.openNow = (Boolean) properties.getOpen().get("open_now");
             }
             if (properties.getAddress().getLines()!=null){
-                ArrayList<String> lines = (ArrayList<String>)properties.getAddress().getLines();
-                detailsResponseItem.formattedAddress =  TextUtils.join(" ", lines);
+                Object linesObject = properties.getAddress().getLines();
+                if (linesObject instanceof ArrayList<?>) {
+                    ArrayList<?> linesList = (ArrayList<?>) linesObject;
+                    // Ensure all elements are Strings
+                    boolean allStrings = linesList.stream().allMatch(item -> item instanceof String);
+                    if (allStrings) {
+                        @SuppressWarnings("unchecked")
+                        ArrayList<String> lines = (ArrayList<String>) linesList;
+                        detailsResponseItem.formattedAddress = TextUtils.join(" ", lines);
+                    } else {
+                        detailsResponseItem.formattedAddress = properties.getName(); // fallback
+                    }
+                } else if (linesObject instanceof String) {
+                    detailsResponseItem.formattedAddress = (String) linesObject;
+                } else {
+                    detailsResponseItem.formattedAddress = properties.getName(); // fallback
+                }
             }
             else{
                 detailsResponseItem.formattedAddress = properties.getName();

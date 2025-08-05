@@ -83,8 +83,6 @@ jobs:
         SEMVER=$(echo "$FULL_VERSION" | sed -E 's/.*_([0-9]+\.[0-9]+(\.[0-9]+)?)/\1/')
         MAJOR_MINOR=$(echo "$SEMVER" | cut -d'.' -f1-2)
         echo "SDK_VERSION=$MAJOR_MINOR" >> $GITHUB_ENV
-        
-
     
     - name: Cleanup base
       run: |
@@ -129,6 +127,7 @@ jobs:
 
     - name: Check if branch is dirty
       id: branch_status
+      if: contains(toJson(github.event.pull_request.labels.*.name), 'Skip Version') == false
       run: |
         if [[ -n $(git status --porcelain) ]]; then
           echo "update=true" >> "$GITHUB_OUTPUT"

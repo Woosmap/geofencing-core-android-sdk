@@ -112,7 +112,7 @@ jobs:
 
     - name: Update version for SDK
       run: |
-        sed -i "s/^VERSION_NAME=.*/VERSION_NAME=$SDK_VERSION/" gradle.properties
+        sed -i "s/^VERSION_NAME=.*/VERSION_NAME=core_geofence_$SDK_VERSION/" gradle.properties
 
     - name: Check if branch is dirty
       id: branch_status

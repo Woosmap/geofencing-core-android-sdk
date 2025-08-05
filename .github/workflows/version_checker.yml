@@ -62,7 +62,8 @@ jobs:
       run: |
         cd sdk
         npm version patch --git-tag-version false
-        echo "SDK_VERSION=$(jq -r '.version' package.json)" >> $GITHUB_ENV
+        FULL_VERSION=$(jq -r '.version' package.json)
+        echo "SDK_VERSION=$FULL_VERSION" >> $GITHUB_ENV
 
     - name: Bump Minor version
       if: contains(toJson(github.event.pull_request.labels.*.name), 'Minor :sparkles:')
@@ -70,9 +71,10 @@ jobs:
         cd sdk
         npm version minor --git-tag-version false
         FULL_VERSION=$(jq -r '.version' package.json)
-        SEMVER=$(echo "$FULL_VERSION" | sed -E 's/.*_([0-9]+\.[0-9]+(\.[0-9]+)?)/\1/')
-        MAJOR_MINOR=$(echo "$SEMVER" | cut -d'.' -f1-2)
-        echo "SDK_VERSION=$MAJOR_MINOR" >> $GITHUB_ENV
+        echo "SDK_VERSION=$FULL_VERSION" >> $GITHUB_ENV
+        # SEMVER=$(echo "$FULL_VERSION" | sed -E 's/.*_([0-9]+\.[0-9]+(\.[0-9]+)?)/\1/')
+        # MAJOR_MINOR=$(echo "$SEMVER" | cut -d'.' -f1-2)
+        # echo "SDK_VERSION=$MAJOR_MINOR" >> $GITHUB_ENV
 
     - name: Bump Major version
       if: contains(toJson(github.event.pull_request.labels.*.name), 'Major :star2:')
@@ -80,9 +82,10 @@ jobs:
         cd sdk
         npm version major --git-tag-version false
         FULL_VERSION=$(jq -r '.version' package.json)
-        SEMVER=$(echo "$FULL_VERSION" | sed -E 's/.*_([0-9]+\.[0-9]+(\.[0-9]+)?)/\1/')
-        MAJOR_MINOR=$(echo "$SEMVER" | cut -d'.' -f1-2)
-        echo "SDK_VERSION=$MAJOR_MINOR" >> $GITHUB_ENV
+        echo "SDK_VERSION=$FULL_VERSION" >> $GITHUB_ENV
+        # SEMVER=$(echo "$FULL_VERSION" | sed -E 's/.*_([0-9]+\.[0-9]+(\.[0-9]+)?)/\1/')
+        # MAJOR_MINOR=$(echo "$SEMVER" | cut -d'.' -f1-2)
+        # echo "SDK_VERSION=$MAJOR_MINOR" >> $GITHUB_ENV
     
     - name: Cleanup base
       run: |

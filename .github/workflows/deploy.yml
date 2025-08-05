@@ -1,0 +1,59 @@
+name: Publish Core SDK
+
+on:
+  push:
+    branches:
+      - cicd
+    paths:
+      - gradle.properties
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+
+jobs:
+  Build_framework:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        
+      - name: Capture current version
+        run: |
+          VERSION_NAME=$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2)
+          echo "SDK_VERSION=${VERSION_NAME}" >> $GITHUB_ENV
+    
+      - name: Create Git tag
+        if: github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag ${VERSION}
+          git push origin ${VERSION}
+        env:
+          VERSION: ${{ env.SDK_VERSION}}
+      
+      - name: Create GitHub Release
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.SDK_VERSION}}
+          body_path: changelog.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub preRelease
+        if: github.ref != format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.SDK_VERSION}}
+          body_path: changelog.md
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+     
+
+  

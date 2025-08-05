@@ -25,7 +25,7 @@ jobs:
       contains(toJson(github.event.pull_request.labels.*.name), 'Major :star2:') ||
       contains(toJson(github.event.pull_request.labels.*.name), 'Minor :sparkles:') ||
       contains(toJson(github.event.pull_request.labels.*.name), 'Patch :bug:') ||
-      contains(toJson(github.event.pull_request.labels.*.name), 'Skip Version')
+      contains(toJson(github.event.pull_request.labels.*.name), 'Beta Version')
 
     steps:
 
@@ -127,7 +127,7 @@ jobs:
 
     - name: Check if branch is dirty
       id: branch_status
-      if: contains(toJson(github.event.pull_request.labels.*.name), 'Skip Version') == false
+      if: contains(toJson(github.event.pull_request.labels.*.name), 'Beta Version') == false
       run: |
         if [[ -n $(git status --porcelain) ]]; then
           echo "update=true" >> "$GITHUB_OUTPUT"

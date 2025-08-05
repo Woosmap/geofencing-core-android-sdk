@@ -3,7 +3,7 @@ name: PR Checker
 on:
   pull_request:
     branches:
-      - 'cicd'
+      - 'master'
     types: [synchronize, labeled, opened]
     
 concurrency:

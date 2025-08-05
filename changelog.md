@@ -1,1 +1,1 @@
-Enhancement: Automation
+- Enhancement: Automation and release SDK

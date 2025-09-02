@@ -76,8 +76,6 @@ public class POI {
 
             // Device-local time
             ZonedDateTime deviceNow = ZonedDateTime.now();
-            Log.d("POI-DEBUG", "Device time: " + deviceNow.toString());
-            Log.d("POI-DEBUG", "POI time (" + timezoneStr + "): " + poiNow.toString());
 
             // Check temporary closure
             if (json.has("temporary_closure")) {
@@ -87,7 +85,6 @@ public class POI {
                     LocalDate start = LocalDate.parse(range.get("start").getAsString());
                     LocalDate end = LocalDate.parse(range.get("end").getAsString());
                     if (!today.isBefore(start) && !today.isAfter(end)) {
-                        Log.d("POI-DEBUG", "Closed due to temporary closure");
                         return false;
                     }
                 }
@@ -100,7 +97,6 @@ public class POI {
                 if (special.has(todayKey)) {
                     JsonArray specialHours = special.getAsJsonArray(todayKey);
                     boolean open = isOpenDuring(currentTime, specialHours);
-                    Log.d("POI-DEBUG", "Using special hours for " + todayKey + ": " + open);
                     return open;
                 }
             }
@@ -111,12 +107,11 @@ public class POI {
                 JsonArray todayHours = usual.has(dayKey) ? usual.getAsJsonArray(dayKey) :
                         usual.has("default") ? usual.getAsJsonArray("default") : new JsonArray();
                 boolean open = isOpenDuring(currentTime, todayHours);
-                Log.d("POI-DEBUG", "Using usual/default hours for day " + dayKey + ": " + open);
                 return open;
             }
         }
         catch (Exception ex){
-            Log.e("POI-DEBUG", "Error while parsing opening hours", ex);
+            Log.e("Error", "Error while parsing opening hours", ex);
         }
         return false;
     }

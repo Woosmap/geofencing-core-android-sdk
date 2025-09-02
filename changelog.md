@@ -1,1 +1,1 @@
-- Enhancement: Automation and release SDK
+- Enhancement: Expose `openNow` method in `POI` class that checks opening hours to determine if the `POI` is open at the given time.

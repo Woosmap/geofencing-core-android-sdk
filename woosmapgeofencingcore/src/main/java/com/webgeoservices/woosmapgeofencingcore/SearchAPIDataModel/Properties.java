@@ -11,6 +11,7 @@ public class Properties {
     private Object[] tags;
     private Object[] types;
     private Double distance;
+    private HashMap<String, Object> opening_hours;
 
     private HashMap<String, Object> open;
 
@@ -81,4 +82,12 @@ public class Properties {
     public HashMap<String, Object> getOpen() {return open;}
 
     public void setOpen(HashMap<String, Object> open) {this.open = open;}
+
+    public HashMap<String, Object> getOpeningHours() {
+        return opening_hours;
+    }
+
+    public void setOpeningHours(HashMap<String, Object> value) {
+        this.opening_hours = value;
+    }
 }

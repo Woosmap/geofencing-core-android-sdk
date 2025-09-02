@@ -39,6 +39,7 @@ public class SearchAPIResponseItemCore implements Parcelable {
     public JSONObject item;
     public Geometry geometry;
     public HashMap<String, Object> userProperties;
+    public HashMap<String, Object> openingHours;
 
     /***
      * protected constructor
@@ -215,6 +216,15 @@ public class SearchAPIResponseItemCore implements Parcelable {
                 }
             }
             detailsResponseItem.userProperties = userProperties;
+
+            HashMap<String, Object> openingHours = new HashMap<>();
+            if (properties.getOpeningHours()!=null){
+                for (String key: properties.getOpeningHours().keySet()){
+                    Object object = properties.getOpeningHours().get(key);
+                    openingHours.put(key, object);
+                }
+            }
+            detailsResponseItem.openingHours = openingHours;
 
             Geometry geometryDetail = new Geometry();
             geometryDetail.setLocation(new Location(

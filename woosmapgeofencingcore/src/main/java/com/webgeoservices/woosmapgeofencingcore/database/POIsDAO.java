@@ -37,6 +37,7 @@ public abstract class POIsDAO {
             existingPOI.lat = poi.lat;
             existingPOI.lng = poi.lng;
             existingPOI.openNow = poi.openNow;
+            existingPOI.openingHours = poi.openingHours;
             updatePOI(existingPOI);
             return false;
         }

@@ -1,2 +1,2 @@
-- Expose `openNow` method in `POI` class that checks opening hours to determine if the `POI` is open at the given time.
-- Upgraded `minSdk` to 26 from 21
+- Bug fix: Address parsing throws exception when `lines` attribute in an asset is a string instead of an array
+- Upgraded `minSdk` version to 26

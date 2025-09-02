@@ -1,1 +1,2 @@
-- Enhancement: Automation and release SDK
+- Expose `openNow` method in `POI` class that checks opening hours to determine if the `POI` is open at the given time.
+- Upgraded `minSdk` to 26 from 21

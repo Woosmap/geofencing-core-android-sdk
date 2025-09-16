@@ -160,7 +160,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
             Logger.getInstance().d("Is position inside region ${it.identifier} ? : $isInside")
 
             if (isInside != it.isCurrentPositionInside) {
-                Logger.getInstance().d("Position ${movingPosition.lat} , ${movingPosition.lng} entered inside a region. Updating region and creating regionLog.")
+                Logger.getInstance().d("Position ${movingPosition.lat} , ${movingPosition.lng} transitioned a region. Updating region and creating regionLog.")
                 it.isCurrentPositionInside = isInside
                 it.dateTime = System.currentTimeMillis()
                 this.db.regionsDAO.updateRegion(it)
@@ -179,6 +179,9 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
                     Logger.getInstance().d("Region.didEnter: (${it.didEnter}) ")
                     Logger.getInstance().d("isInside: ($isInside) ")
                 }
+            }
+            else{
+                Logger.getInstance().d("Position ${movingPosition.lat} , ${movingPosition.lng} has not transitioned a region. No need to invoke RegionLogReadyCallback.")
             }
         }
 

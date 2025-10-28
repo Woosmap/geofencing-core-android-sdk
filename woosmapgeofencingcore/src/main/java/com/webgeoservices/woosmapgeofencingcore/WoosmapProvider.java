@@ -4,8 +4,11 @@ package com.webgeoservices.woosmapgeofencingcore;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
 
@@ -285,5 +288,21 @@ public abstract class WoosmapProvider {
 
 
     public abstract void getLastRegionState();
+
+    protected int getIconFromManifestVariable() {
+        ApplicationInfo mApplicationInfo;
+        try {
+            mApplicationInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            Bundle bundle = mApplicationInfo.metaData;
+            if (bundle.containsKey("woosmap.messaging.default_notification_icon")) {
+                return bundle.getInt("woosmap.messaging.default_notification_icon", R.drawable.ic_local_grocery_store_black_24dp);
+            } else {
+                return R.drawable.ic_local_grocery_store_black_24dp;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return R.drawable.ic_local_grocery_store_black_24dp;
+        }
+    }
 
 }

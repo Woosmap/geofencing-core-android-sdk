@@ -5,6 +5,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -262,5 +265,21 @@ public class WoosmapCore extends WoosmapProvider{
                 }
             }
         });
+    }
+
+    protected int getIconFromManifestVariable() {
+        ApplicationInfo mApplicationInfo;
+        try {
+            mApplicationInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            Bundle bundle = mApplicationInfo.metaData;
+            if (bundle.containsKey("woosmap.messaging.default_notification_icon")) {
+                return bundle.getInt("woosmap.messaging.default_notification_icon", R.drawable.ic_local_grocery_store_black_24dp);
+            } else {
+                return R.drawable.ic_local_grocery_store_black_24dp;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return R.drawable.ic_local_grocery_store_black_24dp;
+        }
     }
 }

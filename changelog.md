@@ -1,2 +1,1 @@
-- Bug fix: Address parsing throws exception when `lines` attribute in an asset is a string instead of an array
-- Upgraded `minSdk` version to 26
+- Bug fix: Fix `didEnter` flag value

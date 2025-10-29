@@ -125,11 +125,11 @@ public class LocationUpdatesServiceCore extends BaseLocationUpdateService {
                 }
             }
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                startForeground( NOTIFICATION_ID, getNotification(LocationUpdatesServiceCore.class,mLocation,EXTRA_STARTED_FROM_NOTIFICATION,getIconFromManifestVariable()), FOREGROUND_SERVICE_TYPE_LOCATION );
+                startForeground( NOTIFICATION_ID, getNotification(LocationUpdatesServiceCore.class,mLocation,EXTRA_STARTED_FROM_NOTIFICATION,WoosmapCore.getInstance().getIconFromManifestVariable()), FOREGROUND_SERVICE_TYPE_LOCATION );
             } else {
-                startForeground( NOTIFICATION_ID,getNotification(LocationUpdatesServiceCore.class,mLocation,EXTRA_STARTED_FROM_NOTIFICATION,getIconFromManifestVariable()) );
+                startForeground( NOTIFICATION_ID,getNotification(LocationUpdatesServiceCore.class,mLocation,EXTRA_STARTED_FROM_NOTIFICATION,WoosmapCore.getInstance().getIconFromManifestVariable()) );
             }
-            mNotificationManager.notify(NOTIFICATION_ID, getNotification(LocationUpdatesServiceCore.class,mLocation,EXTRA_STARTED_FROM_NOTIFICATION,getIconFromManifestVariable()));
+            mNotificationManager.notify(NOTIFICATION_ID, getNotification(LocationUpdatesServiceCore.class,mLocation,EXTRA_STARTED_FROM_NOTIFICATION,WoosmapCore.getInstance().getIconFromManifestVariable()));
         } catch (SecurityException unlikely) {
             Log.e(TAG, "Lost location permission. Could not request updates. " + unlikely);
         }
@@ -152,20 +152,5 @@ public class LocationUpdatesServiceCore extends BaseLocationUpdateService {
         PositionsManagerCore positionsManagerCore = new PositionsManagerCore(getApplicationContext(), db,WoosmapCore.getInstance());
         positionsManagerCore.asyncManageLocation( Collections.singletonList( mLocation ) );
 
-    }
-    private int getIconFromManifestVariable() {
-        ApplicationInfo mApplicationInfo;
-        try {
-            mApplicationInfo = getApplication().getPackageManager().getApplicationInfo(getApplication().getPackageName(), PackageManager.GET_META_DATA);
-            Bundle bundle = mApplicationInfo.metaData;
-            if (bundle.containsKey("woosmap.messaging.default_notification_icon")) {
-                return bundle.getInt("woosmap.messaging.default_notification_icon", R.drawable.ic_local_grocery_store_black_24dp);
-            } else {
-                return R.drawable.ic_local_grocery_store_black_24dp;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return R.drawable.ic_local_grocery_store_black_24dp;
-        }
     }
 }

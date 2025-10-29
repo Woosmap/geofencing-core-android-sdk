@@ -5,6 +5,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -263,4 +266,5 @@ public class WoosmapCore extends WoosmapProvider{
             }
         });
     }
+
 }

@@ -1,2 +1,2 @@
-- Bug fix: Address parsing throws exception when `lines` attribute in an asset is a string instead of an array
-- Upgraded `minSdk` version to 26
+- Minor code refactoring: Moved getIconFromManifestVariable from `LocationUpdatesServiceCore` to `WoosmapProvider` so that it can be used in enterprise SDK
+

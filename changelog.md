@@ -1,2 +1,1 @@
-- Minor code refactoring: Moved getIconFromManifestVariable from `LocationUpdatesServiceCore` to `WoosmapProvider` so that it can be used in enterprise SDK
-
+- Bug fix: Fix `didEnter` flag value

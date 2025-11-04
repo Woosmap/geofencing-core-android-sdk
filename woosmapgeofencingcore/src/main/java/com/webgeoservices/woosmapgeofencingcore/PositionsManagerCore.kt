@@ -196,7 +196,7 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         var regionLog = RegionLog()
         regionLog.identifier = region.identifier
         regionLog.dateTime = region.dateTime
-        regionLog.didEnter = region.didEnter
+        regionLog.didEnter = isInside
         regionLog.lat = region.lat
         regionLog.lng = region.lng
         regionLog.idStore = region.idStore

@@ -1,0 +1,35 @@
+# Dependabot configuration
+# Docs: https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+updates:
+  # Gradle: root project plus the :app and :woosmapgeofencingcore modules
+  - package-ecosystem: "gradle"
+    directories:
+      - "/"
+      - "/app"
+      - "/woosmapgeofencingcore"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    groups:
+      # Batch low-risk minor/patch bumps into a single PR to cut noise;
+      # major bumps stay as individual PRs for manual review.
+      gradle-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions used by deploy.yml and version_checker.yml
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

@@ -67,7 +67,7 @@ dependencies {
     implementation ('com.google.truth:truth:1.4.4') {
         exclude group: 'com.google.guava', module: 'guava'
     }
-    implementation 'com.google.android.gms:play-services-maps:19.1.0'
+    implementation 'com.google.android.gms:play-services-maps:20.0.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.google.guava:guava:33.4.0-jre'
 }

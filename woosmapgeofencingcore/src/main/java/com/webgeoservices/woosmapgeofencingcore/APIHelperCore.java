@@ -10,7 +10,7 @@ import com.android.volley.toolbox.StringRequest;
 
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public class APIHelperCore {
     private Context context;

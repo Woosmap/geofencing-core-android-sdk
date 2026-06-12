@@ -278,19 +278,20 @@ public class MainActivity extends AppCompatActivity {
         bottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.navigation_map:
-                        setFragment(mapFragment);
-                        return true;
-                    case R.id.navigation_location:
-                        setFragment(locationFragment);
-                        return true;
-                    case R.id.navigation_visit:
-                        setFragment(visitFragment);
-                        return true;
-                    default:
-                        return false;
+                // AGP 9 makes R fields non-final, so switch/case on R.id is no
+                // longer valid (case labels must be compile-time constants).
+                int itemId = item.getItemId();
+                if (itemId == R.id.navigation_map) {
+                    setFragment(mapFragment);
+                    return true;
+                } else if (itemId == R.id.navigation_location) {
+                    setFragment(locationFragment);
+                    return true;
+                } else if (itemId == R.id.navigation_visit) {
+                    setFragment(visitFragment);
+                    return true;
                 }
+                return false;
             }
 
         });

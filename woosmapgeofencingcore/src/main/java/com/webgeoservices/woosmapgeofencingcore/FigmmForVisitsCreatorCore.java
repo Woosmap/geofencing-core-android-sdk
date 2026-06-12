@@ -8,9 +8,8 @@ import com.webgeoservices.woosmapgeofencingcore.database.Visit;
 import com.webgeoservices.woosmapgeofencingcore.database.WoosmapDb;
 import com.webgeoservices.woosmapgeofencingcore.database.ZOI;
 
-import org.ojalgo.matrix.PrimitiveMatrix;
+import org.ojalgo.matrix.MatrixR064;
 import org.ojalgo.matrix.decomposition.Eigenvalue;
-import org.ojalgo.matrix.decomposition.EigenvalueDecomposition;
 import org.ojalgo.matrix.store.MatrixStore;
 import org.ojalgo.matrix.store.PhysicalStore;
 
@@ -185,7 +184,7 @@ public class FigmmForVisitsCreatorCore {
             newZOI.latMean = mean_array[0];
             newZOI.lngMean = mean_array[1];
 
-            final PrimitiveMatrix covariance_matrix_inverse = (PrimitiveMatrix) zois_gmm_info.get("covariance_matrix_inverse");
+            final MatrixR064 covariance_matrix_inverse = (MatrixR064) zois_gmm_info.get("covariance_matrix_inverse");
             newZOI.x00Covariance_matrix_inverse = covariance_matrix_inverse.get(0);
             newZOI.x01Covariance_matrix_inverse = covariance_matrix_inverse.get(1);
             newZOI.x10Covariance_matrix_inverse = covariance_matrix_inverse.get(2);
@@ -247,7 +246,7 @@ public class FigmmForVisitsCreatorCore {
             final double[][] myArray = {
                     {zoiDB.x00Covariance_matrix_inverse, zoiDB.x01Covariance_matrix_inverse}, {zoiDB.x10Covariance_matrix_inverse, zoiDB.x11Covariance_matrix_inverse}};
 
-            final PrimitiveMatrix covariance_matrix_inverse = PrimitiveMatrix.FACTORY.rows(myArray);
+            final MatrixR064 covariance_matrix_inverse = MatrixR064.FACTORY.rows(myArray);
             zois_gmm_info.put("covariance_matrix_inverse", covariance_matrix_inverse);
 
             zois_gmm_info.put("mean", new double[]{zoiDB.latMean,zoiDB.lngMean});
@@ -326,7 +325,7 @@ public class FigmmForVisitsCreatorCore {
                 {1.0, 0.0},
                 {0.0, 1.0}
         };
-        final PrimitiveMatrix covariance_matrix_inverse = PrimitiveMatrix.FACTORY.rows(covariance_matrix_inverse_Array).multiply(Math.pow(sigma, -2));
+        final MatrixR064 covariance_matrix_inverse = MatrixR064.FACTORY.rows(covariance_matrix_inverse_Array).multiply(Math.pow(sigma, -2));
         zois_gmm_info.put("covariance_matrix_inverse", covariance_matrix_inverse);
 
         if (list_zois.isEmpty()) {
@@ -388,13 +387,13 @@ public class FigmmForVisitsCreatorCore {
             double[][] mean_array = {{mean_arrayFromZOI[0],mean_arrayFromZOI[1]},
                     {0.0,0.0}};
 
-            final PrimitiveMatrix matrix_point = PrimitiveMatrix.FACTORY.rows(point_array);
-            final PrimitiveMatrix matrix_mean = PrimitiveMatrix.FACTORY.rows(mean_array);
-            final PrimitiveMatrix matrix_error = matrix_point.subtract(matrix_mean);
+            final MatrixR064 matrix_point = MatrixR064.FACTORY.rows(point_array);
+            final MatrixR064 matrix_mean = MatrixR064.FACTORY.rows(mean_array);
+            final MatrixR064 matrix_error = matrix_point.subtract(matrix_mean);
 
-            final PrimitiveMatrix covariance_matrix_inverse = (PrimitiveMatrix) zois_gmm_info.get("covariance_matrix_inverse");
-            final PrimitiveMatrix a = matrix_error.multiplyLeft(covariance_matrix_inverse);
-            PrimitiveMatrix a2 = a.multiplyRight(matrix_error.transpose());
+            final MatrixR064 covariance_matrix_inverse = (MatrixR064) zois_gmm_info.get("covariance_matrix_inverse");
+            final MatrixR064 a = covariance_matrix_inverse.multiply(matrix_error);
+            MatrixR064 a2 = a.multiply(matrix_error.transpose());
 
             double mahalanobis_distance = Math.sqrt(a2.get(0));
             sqr_mahalanobis_distances.add(Math.pow(mahalanobis_distance, 2));
@@ -468,52 +467,52 @@ public class FigmmForVisitsCreatorCore {
         zoi_gmminfo.put("accumulator", (Double) zoi_gmminfo.get("accumulator") + j_x_probability);
 
 
-        final PrimitiveMatrix matrix_point = PrimitiveMatrix.FACTORY.rows(point_array);
-        final PrimitiveMatrix matrix_mean = PrimitiveMatrix.FACTORY.rows(mean_array);
-        final PrimitiveMatrix matrix_error = matrix_point.subtract(matrix_mean);
+        final MatrixR064 matrix_point = MatrixR064.FACTORY.rows(point_array);
+        final MatrixR064 matrix_mean = MatrixR064.FACTORY.rows(mean_array);
+        final MatrixR064 matrix_error = matrix_point.subtract(matrix_mean);
         double weight = j_x_probability / (Double) zoi_gmminfo.get("accumulator");
-        final PrimitiveMatrix matrix_delta_mean = matrix_error.multiply(weight);
-        final PrimitiveMatrix matrix_mean_plus_delta_mean = matrix_delta_mean.add(matrix_mean);
-        final PrimitiveMatrix covariance_matrix_inverse = (PrimitiveMatrix) zoi_gmminfo.get("covariance_matrix_inverse");
-        final PrimitiveMatrix matrix_new_error = matrix_point.subtract(matrix_mean_plus_delta_mean);
+        final MatrixR064 matrix_delta_mean = matrix_error.multiply(weight);
+        final MatrixR064 matrix_mean_plus_delta_mean = matrix_delta_mean.add(matrix_mean);
+        final MatrixR064 covariance_matrix_inverse = (MatrixR064) zoi_gmminfo.get("covariance_matrix_inverse");
+        final MatrixR064 matrix_new_error = matrix_point.subtract(matrix_mean_plus_delta_mean);
 
 
         double factorTerm1 = weight / Math.pow((1 - weight), 2);
-        final PrimitiveMatrix matrix_new_term1a = covariance_matrix_inverse.multiplyLeft(matrix_new_error.transpose());
-        final PrimitiveMatrix matrix_new_term1b = matrix_new_term1a.multiplyRight(matrix_new_error);
-        final PrimitiveMatrix matrix_new_term1c = matrix_new_term1b.multiplyRight(covariance_matrix_inverse);
-        final PrimitiveMatrix matrix_new_term1 = matrix_new_term1c.multiply(factorTerm1);
+        final MatrixR064 matrix_new_term1a = matrix_new_error.transpose().multiply(covariance_matrix_inverse);
+        final MatrixR064 matrix_new_term1b = matrix_new_term1a.multiply(matrix_new_error);
+        final MatrixR064 matrix_new_term1c = matrix_new_term1b.multiply(covariance_matrix_inverse);
+        final MatrixR064 matrix_new_term1 = matrix_new_term1c.multiply(factorTerm1);
 
         double factor = weight / (1 - weight);
-        final PrimitiveMatrix matrix_new_term2a = matrix_new_error.multiply(factor);
-        final PrimitiveMatrix matrix_new_term2b = matrix_new_term2a.multiplyLeft(covariance_matrix_inverse);
-        final PrimitiveMatrix matrix_new_errorTransposed = matrix_new_error.transpose();
-        final PrimitiveMatrix matrix_new_term2 = matrix_new_term2b.multiplyRight(matrix_new_errorTransposed).add(1);
+        final MatrixR064 matrix_new_term2a = matrix_new_error.multiply(factor);
+        final MatrixR064 matrix_new_term2b = covariance_matrix_inverse.multiply(matrix_new_term2a);
+        final MatrixR064 matrix_new_errorTransposed = matrix_new_error.transpose();
+        final MatrixR064 matrix_new_term2 = matrix_new_term2b.multiply(matrix_new_errorTransposed).add(1.0);
 
-        final PrimitiveMatrix cov_inv_delta1 = covariance_matrix_inverse.divide((1 - weight));
+        final MatrixR064 cov_inv_delta1 = covariance_matrix_inverse.divide((1 - weight));
 
-        final PrimitiveMatrix cov_inv_delta2_matrix = matrix_new_term1.divide(matrix_new_term2.get(0));
-        final PrimitiveMatrix cov_inv_delta_matrix = cov_inv_delta1.subtract(cov_inv_delta2_matrix);
+        final MatrixR064 cov_inv_delta2_matrix = matrix_new_term1.divide(matrix_new_term2.get(0));
+        final MatrixR064 cov_inv_delta_matrix = cov_inv_delta1.subtract(cov_inv_delta2_matrix);
 
 
-        final PrimitiveMatrix matrix_new_term3 = cov_inv_delta_matrix
-                .multiplyRight(matrix_delta_mean.transpose())
-                .multiplyRight(matrix_delta_mean)
-                .multiplyRight(cov_inv_delta_matrix);
+        final MatrixR064 matrix_new_term3 = cov_inv_delta_matrix
+                .multiply(matrix_delta_mean.transpose())
+                .multiply(matrix_delta_mean)
+                .multiply(cov_inv_delta_matrix);
 
-        final PrimitiveMatrix matrix_new_term4a = matrix_delta_mean
-                .multiplyRight(cov_inv_delta_matrix)
-                .multiplyRight(matrix_delta_mean.transpose());
+        final MatrixR064 matrix_new_term4a = matrix_delta_mean
+                .multiply(cov_inv_delta_matrix)
+                .multiply(matrix_delta_mean.transpose());
 
         double term4 = 1 - matrix_new_term4a.get(0);
-        final PrimitiveMatrix new_inv_matrix = cov_inv_delta_matrix.add(matrix_new_term3.divide(term4));
+        final MatrixR064 new_inv_matrix = cov_inv_delta_matrix.add(matrix_new_term3.divide(term4));
 
         double cov_det_delta1 = Math.pow(1 - weight, 2) * ((Double) zoi_gmminfo.get("covariance_det"));
-        final PrimitiveMatrix cov_det_delta2 = matrix_new_error.multiplyRight(cov_inv_delta_matrix).multiplyRight(matrix_new_error.transpose());
-        final PrimitiveMatrix cov_det_delta3 = cov_det_delta2.multiply(weight / (1 - weight)).add(1);
+        final MatrixR064 cov_det_delta2 = matrix_new_error.multiply(cov_inv_delta_matrix).multiply(matrix_new_error.transpose());
+        final MatrixR064 cov_det_delta3 = cov_det_delta2.multiply(weight / (1 - weight)).add(1.0);
         double cov_det_delta = cov_det_delta1 * cov_det_delta3.get(0);
 
-        final PrimitiveMatrix new_covariance_determinant1 = matrix_delta_mean.multiplyRight(cov_inv_delta_matrix).multiplyRight(matrix_delta_mean.transpose());
+        final MatrixR064 new_covariance_determinant1 = matrix_delta_mean.multiply(cov_inv_delta_matrix).multiply(matrix_delta_mean.transpose());
         double new_covariance_determinant = cov_det_delta * (1 - new_covariance_determinant1.get(0));
 
 
@@ -572,11 +571,11 @@ public class FigmmForVisitsCreatorCore {
 
     public String figmm(Map zoi_gmminfo) {
 
-        final PrimitiveMatrix covariance_matrix_inverse = (PrimitiveMatrix) zoi_gmminfo.get("covariance_matrix_inverse");
-        final PrimitiveMatrix covariance_matrix = covariance_matrix_inverse.invert();
+        final MatrixR064 covariance_matrix_inverse = (MatrixR064) zoi_gmminfo.get("covariance_matrix_inverse");
+        final MatrixR064 covariance_matrix = covariance_matrix_inverse.invert();
 
-        final Eigenvalue<Double> evd = EigenvalueDecomposition.makePrimitive();
-        evd.compute(covariance_matrix);
+        final Eigenvalue<Double> evd = Eigenvalue.R064.make(covariance_matrix);
+        evd.decompose(covariance_matrix);
         final MatrixStore<Double> tmpV = evd.getV();
         final PhysicalStore<Double> tmpD = evd.getD().copy();
 
@@ -604,17 +603,17 @@ public class FigmmForVisitsCreatorCore {
         double x_mean = mean_array[0];
         double y_mean = mean_array[1];
 
-        final PrimitiveMatrix a_vector_Matrix = PrimitiveMatrix.FACTORY.rows(a_vector);
-        final PrimitiveMatrix a1 = covariance_matrix_inverse.multiplyLeft(a_vector_Matrix);
-        final PrimitiveMatrix a2 = a_vector_Matrix.transpose();
-        final PrimitiveMatrix a = a1.multiplyRight(a2);
+        final MatrixR064 a_vector_Matrix = MatrixR064.FACTORY.rows(a_vector);
+        final MatrixR064 a1 = a_vector_Matrix.multiply(covariance_matrix_inverse);
+        final MatrixR064 a2 = a_vector_Matrix.transpose();
+        final MatrixR064 a = a1.multiply(a2);
 
-        double a_val = Math.sqrt(chi_squared_value(0.7) / a.doubleValue(0));
+        double a_val = Math.sqrt(chi_squared_value(0.7) / a.get(0));
 
-        final PrimitiveMatrix b_vector_Matrix = PrimitiveMatrix.FACTORY.rows(b_vector);
-        final PrimitiveMatrix b = b_vector_Matrix.multiplyLeft(covariance_matrix_inverse).multiplyRight(b_vector_Matrix.transpose());
+        final MatrixR064 b_vector_Matrix = MatrixR064.FACTORY.rows(b_vector);
+        final MatrixR064 b = covariance_matrix_inverse.multiply(b_vector_Matrix).multiply(b_vector_Matrix.transpose());
 
-        double b_val = Math.sqrt(chi_squared_value(0.7) / b.doubleValue(0));
+        double b_val = Math.sqrt(chi_squared_value(0.7) / b.get(0));
 
         StringBuilder sb = new StringBuilder();
         sb.append("POLYGON((");
@@ -654,13 +653,13 @@ public class FigmmForVisitsCreatorCore {
             double[][] mean_array = {{mean_arrayFromZOI[0],mean_arrayFromZOI[1]},
                     {0.0,0.0}};
 
-            final PrimitiveMatrix matrix_point = PrimitiveMatrix.FACTORY.rows(point_array);
-            final PrimitiveMatrix matrix_mean = PrimitiveMatrix.FACTORY.rows(mean_array);
-            final PrimitiveMatrix matrix_error = matrix_point.subtract(matrix_mean);
+            final MatrixR064 matrix_point = MatrixR064.FACTORY.rows(point_array);
+            final MatrixR064 matrix_mean = MatrixR064.FACTORY.rows(mean_array);
+            final MatrixR064 matrix_error = matrix_point.subtract(matrix_mean);
 
-            final PrimitiveMatrix covariance_matrix_inverse = (PrimitiveMatrix) zois_gmm_info.get("covariance_matrix_inverse");
-            final PrimitiveMatrix a = matrix_error.multiplyLeft(covariance_matrix_inverse);
-            PrimitiveMatrix a2 = a.multiplyRight(matrix_error.transpose());
+            final MatrixR064 covariance_matrix_inverse = (MatrixR064) zois_gmm_info.get("covariance_matrix_inverse");
+            final MatrixR064 a = covariance_matrix_inverse.multiply(matrix_error);
+            MatrixR064 a2 = a.multiply(matrix_error.transpose());
 
             double mahalanobis_distance = Math.sqrt((Double) a2.get(0));
             sqr_mahalanobis_distances.add(Math.pow(mahalanobis_distance, 2));

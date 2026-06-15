@@ -1,5 +1,8 @@
 plugins {
     id 'com.android.library'
+    // Self-contained publishing. JitPack used to auto-inject maven-publish, but
+    // that injection no longer registers publishToMavenLocal on Gradle 9 / AGP 9.
+    id 'maven-publish'
 }
 
 android {
@@ -33,6 +36,28 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     namespace 'com.webgeoservices.woosmapgeofencingcore'
+
+    // AGP 9 only exposes a publishable software component when a variant is
+    // explicitly declared. This produces the 'release' component plus a sources jar.
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
+}
+
+// JitPack invokes publishToMavenLocal with -Pgroup / -Pversion, which set
+// project.group and project.version. 'from components.release' then publishes
+// the release AAR under those coordinates; JitPack republishes it as
+// com.github.Woosmap:geofencing-core-android-sdk:<tag>.
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+            }
+        }
+    }
 }
 
 dependencies {

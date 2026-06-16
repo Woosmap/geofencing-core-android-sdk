@@ -1,1 +1,3 @@
-- Bug fix: Fix `didEnter` flag value
+- Fixed JitPack publishing on Gradle 9 / AGP 9 (explicit `maven-publish` + `jitpack.yml`)
+- Upgraded toolchain: AGP 8.3.0 → 9.2.1, Gradle 8.9 → 9.5.1, Kotlin 1.9.0 → 2.4.0, compileSdk 35 → 36
+- Upgraded dependencies: ojalgo 56.2.1, play-services-maps 20.0.0, android-maps-utils 4.4.0, gson 2.14.0, guava 33.6.0

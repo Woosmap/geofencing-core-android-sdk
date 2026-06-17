@@ -1,3 +1,4 @@
+- Restored Kotlin 1.9.x consumer compatibility: reverted toolchain to AGP 8.13.0 / Gradle 8.13 / Kotlin 1.9.23 so the AAR is stamped with Kotlin 1.9 metadata (readable by both 1.9.x and 2.4.0 consumers). Kept ojalgo 56.2.1, guava 33.6.0-jre, `androidx.annotation`, and compileSdk/targetSdk 36 (issue #58).
 - Fixed JitPack publishing on Gradle 9 / AGP 9 (explicit `maven-publish` + `jitpack.yml`)
 - Upgraded toolchain: AGP 8.3.0 → 9.2.1, Gradle 8.9 → 9.5.1, Kotlin 1.9.0 → 2.4.0, compileSdk 35 → 36
 - Upgraded dependencies: ojalgo 56.2.1, play-services-maps 20.0.0, android-maps-utils 4.4.0, gson 2.14.0, guava 33.6.0

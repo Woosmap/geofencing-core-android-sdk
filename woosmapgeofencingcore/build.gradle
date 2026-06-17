@@ -1,5 +1,9 @@
 plugins {
     id 'com.android.library'
+    // AGP 8 has no built-in Kotlin support, so the standalone Kotlin Android
+    // plugin (1.9.23, pinned in the root build.gradle) compiles the single
+    // .kt file and stamps it with Kotlin 1.9 metadata (issue #58).
+    id 'org.jetbrains.kotlin.android'
     // Self-contained publishing. JitPack used to auto-inject maven-publish, but
     // that injection no longer registers publishToMavenLocal on Gradle 9 / AGP 9.
     id 'maven-publish'
@@ -34,6 +38,9 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
     }
     namespace 'com.webgeoservices.woosmapgeofencingcore'
 

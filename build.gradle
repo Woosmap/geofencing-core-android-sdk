@@ -5,15 +5,18 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // AGP 9 provides built-in Kotlin support; the standalone
-        // 'org.jetbrains.kotlin.android' plugin is removed. Pin the Kotlin
-        // Gradle Plugin to 2.4.0 so built-in Kotlin uses the intended version.
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.0'
+        // Pinned to AGP 8.13.x + the standalone Kotlin Gradle Plugin 1.9.23.
+        // AGP 8's standalone Kotlin compiler stamps the AAR with Kotlin 1.9
+        // metadata, keeping core consumable by Kotlin 1.9.x consumers AND 2.4.0
+        // ones (newer compilers read older metadata) (issue #58). AGP 9's
+        // built-in kotlinc ignores this pin and always emits 2.x metadata.
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23'
     }
 }
 plugins {
-    id 'com.android.application' version '9.2.1' apply false
-    id 'com.android.library' version '9.2.1' apply false
+    id 'com.android.application' version '8.13.0' apply false
+    id 'com.android.library' version '8.13.0' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.23' apply false
     id "org.owasp.dependencycheck" version "12.2.2"
 }
 

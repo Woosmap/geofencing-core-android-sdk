@@ -10,13 +10,13 @@ buildscript {
         // metadata, keeping core consumable by Kotlin 1.9.x consumers AND 2.4.0
         // ones (newer compilers read older metadata) (issue #58). AGP 9's
         // built-in kotlinc ignores this pin and always emits 2.x metadata.
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.0'
     }
 }
 plugins {
     id 'com.android.application' version '8.13.0' apply false
     id 'com.android.library' version '8.13.0' apply false
-    id 'org.jetbrains.kotlin.android' version '1.9.23' apply false
+    id 'org.jetbrains.kotlin.android' version '2.4.0' apply false
     id "org.owasp.dependencycheck" version "12.2.2"
 }
 

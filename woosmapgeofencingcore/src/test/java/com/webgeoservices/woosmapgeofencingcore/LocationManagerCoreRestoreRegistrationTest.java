@@ -18,7 +18,7 @@ import java.util.Optional;
 /**
  * Pins how the restore registers with Android (issue #77): one batch first, then one at a
  * time in priority order when Android says there are too many, and nothing decided when Android
- * refuses for another reason.
+ * refuses for another reason. Also pins how the rows Android does not hold are worked out.
  */
 public class LocationManagerCoreRestoreRegistrationTest {
 
@@ -55,10 +55,16 @@ public class LocationManagerCoreRestoreRegistrationTest {
     }
 
     @Test
-    public void anAcceptedBatchRegistersEverythingInOneRequest() {
+    public void anAcceptedBatchMakesOneRequest() {
         ScriptedAdder adder = new ScriptedAdder(AddOutcome.ADDED);
-        Optional<List<Region>> registered = LocationManagerCore.registerInPriorityOrder(regions, adder);
+        LocationManagerCore.registerInPriorityOrder(regions, adder);
         assertEquals(Collections.singletonList(4), adder.requestSizes);
+    }
+
+    @Test
+    public void anAcceptedBatchRegistersEverything() {
+        Optional<List<Region>> registered =
+                LocationManagerCore.registerInPriorityOrder(regions, new ScriptedAdder(AddOutcome.ADDED));
         assertEquals(regions, registered.get());
     }
 
@@ -91,7 +97,30 @@ public class LocationManagerCoreRestoreRegistrationTest {
     @Test
     public void nothingToRegisterMakesNoRequest() {
         ScriptedAdder adder = new ScriptedAdder();
-        Optional<List<Region>> registered = LocationManagerCore.registerInPriorityOrder(Collections.emptyList(), adder);
-        assertTrue(registered.isPresent() && registered.get().isEmpty() && adder.requestSizes.isEmpty());
+        LocationManagerCore.registerInPriorityOrder(Collections.emptyList(), adder);
+        assertTrue(adder.requestSizes.isEmpty());
+    }
+
+    @Test
+    public void nothingToRegisterIsAnEmptySuccess() {
+        Optional<List<Region>> registered =
+                LocationManagerCore.registerInPriorityOrder(Collections.emptyList(), new ScriptedAdder());
+        assertEquals(Optional.of(Collections.emptyList()), registered);
+    }
+
+    @Test
+    public void theRefusedRegionsAreThePlannedOnesAndroidDoesNotHold() {
+        List<Region> registered = regions.subList(0, 2);
+        assertEquals(Arrays.asList("c", "d"), identifiers(LocationManagerCore.missingFrom(regions, registered)));
+    }
+
+    @Test
+    public void nothingIsMissingWhenEverythingIsHeld() {
+        assertTrue(LocationManagerCore.missingFrom(regions, regions).isEmpty());
+    }
+
+    @Test
+    public void everythingIsMissingWhenNothingIsHeld() {
+        assertEquals(regions, LocationManagerCore.missingFrom(regions, Collections.emptyList()));
     }
 }

@@ -9,6 +9,9 @@ import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Collections;
+import java.util.List;
+
 public class GeofenceHelper extends ContextWrapper {
     private static final String TAG = "GeofenceHelper";
 
@@ -16,8 +19,12 @@ public class GeofenceHelper extends ContextWrapper {
         super(base);
     }
     public GeofencingRequest getGeofencingRequest(Geofence geofence){
+        return getGeofencingRequest(Collections.singletonList(geofence));
+    }
+    /** One request for several geofences, with the same initial trigger as a single one. */
+    public GeofencingRequest getGeofencingRequest(List<Geofence> geofences){
         return new GeofencingRequest.Builder()
-                .addGeofence(geofence)
+                .addGeofences(geofences)
                 .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                 .build();
     }

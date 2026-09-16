@@ -75,6 +75,11 @@ public class LocationManagerCoreRestoreSelectionTest {
     }
 
     @Test
+    public void noRegionsSelectsNothing() {
+        assertTrue(LocationManagerCore.selectRegionsToRegister(new Region[0], home, 100).isEmpty());
+    }
+
+    @Test
     public void belowTheLimitEverythingIsKept() {
         assertEquals(7, LocationManagerCore.selectRegionsToRegister(ring(7), home, 100).size());
     }

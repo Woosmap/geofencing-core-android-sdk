@@ -25,6 +25,7 @@ import com.webgeoservices.woosmapgeofencingcore.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -46,7 +47,12 @@ class LocationManagerCore extends LocationManagerProvider{
                     | Geofence.GEOFENCE_TRANSITION_EXIT;
     private static final double EARTH_RADIUS_M = 6_371_000d;
     /** How long one Play Services geofencing call may take before the restore gives up on it. */
-    private static final long GEOFENCE_TASK_TIMEOUT_S = 30;
+    private static final long GEOFENCE_TASK_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(30);
+    /**
+     * Budget for one whole restore, including the one-at-a-time fallback. Kept well under the
+     * 10 minutes a JobIntentService gets on API 26+ so the reboot job is never killed mid-way.
+     */
+    private static final long RESTORE_TIMEOUT_MS = TimeUnit.MINUTES.toMillis(5);
 
     /** Outcome of one add request to Android. */
     enum AddOutcome { ADDED, TOO_MANY, FAILED }
@@ -94,13 +100,15 @@ class LocationManagerCore extends LocationManagerProvider{
     }
 
     /**
-     * Rebuilds Android's geofences from the circular rows of the regions table, then makes the table
-     * match what Android actually holds: rows left out by the 100-per-app cap, or refused by Android
-     * for that reason, are deleted so the table never claims a geofence that is not watched
-     * (issue #77). When Android refuses the whole set for another reason (location off, Play
-     * Services not ready) nothing is known about individual rows, so they are kept for the next attempt.
+     * Rebuilds Android's geofences from the circular rows of the regions table (issue #77). Rows the
+     * SDK itself leaves out because of the 100-per-app cap are deleted, so the table never claims a
+     * geofence the SDK decided not to watch. Rows Android refuses as too many are kept: that count
+     * includes the host app's own geofences, which may shrink before the next restore. When Android
+     * refuses the whole set for another reason (location off, Play Services not ready) nothing is
+     * known about individual rows, so they are kept as well.
      * <p>
-     * Waits for the Play Services calls, so it must run off the main thread.
+     * Waits for the Play Services calls, so it must run off the main thread. The whole restore is
+     * bounded by {@link #RESTORE_TIMEOUT_MS}.
      *
      * @return {@code true} when the removal succeeded and every circular row is now registered.
      */
@@ -112,27 +120,39 @@ class LocationManagerCore extends LocationManagerProvider{
             return false;
         }
         try {
-            // Circular rows only: an isochrone's radius is a travel time in seconds, not a distance.
-            Region[] circles = db.getRegionsDAO().getRegionCircle();
-            MovingPosition lastPosition = db.getMovingPositionsDao().getLastMovingPosition();
-            List<Region> planned = selectRegionsToRegister(circles, lastPosition, MAX_NATIVE_GEOFENCES);
-            // Android gives no ordering guarantee between a bulk removal and the adds that follow.
-            Exception removal = await(mGeofencingClient.removeGeofences(getGeofencePendingIntent()));
-            if (removal != null) {
-                Logger.getInstance().e("Removing geofences before restore failed, adding anyway", removal);
-            }
-            Optional<List<Region>> registered = registerInPriorityOrder(planned, this::addToGeofencingClient);
-            if (!registered.isPresent()) {
-                Logger.getInstance().e("Restore aborted: Android refused the whole set. Rows kept for the next attempt.");
-                return false;
-            }
-            Logger.getInstance().d("onSuccess: " + registered.get().size() + " geofences added");
-            List<Region> dropped = dropUnregisteredRegions(circles, registered.get());
-            return removal == null && dropped.isEmpty();
-        } catch (Exception ex) {
+            return restoreGeofences(System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(RESTORE_TIMEOUT_MS));
+        } catch (RuntimeException ex) {
+            // Room and Play Services throw unchecked; the restore must never take the reboot job down.
             Logger.getInstance().e("Restoring geofences failed", ex);
             return false;
         }
+    }
+
+    /** The restore proper; see {@link #setMonitoringRegions()}. */
+    private boolean restoreGeofences(long deadlineNanos) {
+        // Circular rows only: an isochrone's radius is a travel time in seconds, not a distance.
+        Region[] circles = db.getRegionsDAO().getRegionCircle();
+        MovingPosition lastPosition = db.getMovingPositionsDao().getLastMovingPosition();
+        List<Region> planned = selectRegionsToRegister(circles, lastPosition, MAX_NATIVE_GEOFENCES);
+        // Android gives no ordering guarantee between a bulk removal and the adds that follow.
+        Exception removal = await(mGeofencingClient.removeGeofences(getGeofencePendingIntent()), deadlineNanos);
+        if (removal instanceof InterruptedException) {
+            Logger.getInstance().e("Restore aborted: interrupted while removing geofences. Rows kept for the next attempt.");
+            return false;
+        }
+        if (removal != null) {
+            Logger.getInstance().e("Removing geofences before restore failed, adding anyway", removal);
+        }
+        Optional<List<Region>> registered =
+                registerInPriorityOrder(planned, regions -> addToGeofencingClient(regions, deadlineNanos));
+        if (!registered.isPresent()) {
+            Logger.getInstance().e("Restore aborted: Android refused the whole set. Rows kept for the next attempt.");
+            return false;
+        }
+        Logger.getInstance().d("onSuccess: " + registered.get().size() + " geofences added");
+        dropRegionsOverCap(circles, planned);
+        logRefusedRegions(planned, registered.get());
+        return removal == null && registered.get().size() == circles.length;
     }
 
     /**
@@ -173,6 +193,9 @@ class LocationManagerCore extends LocationManagerProvider{
      * inside first, then the nearest to {@code lastPosition}. Without a known position, the most
      * recently touched come first. The old restore took the first rows in ascending {@code dateTime}
      * order, which kept the least recently used and refused the ones just crossed.
+     * <p>
+     * Only the enterprise SDK writes {@code isCurrentPositionInside}; in core it is always
+     * {@code false}, so the distance (or recency) rule alone decides.
      */
     static List<Region> selectRegionsToRegister(Region[] regions, MovingPosition lastPosition, int limit) {
         Comparator<Region> byDistanceOrRecency = lastPosition == null
@@ -195,40 +218,56 @@ class LocationManagerCore extends LocationManagerProvider{
         return 2 * EARTH_RADIUS_M * Math.asin(Math.sqrt(a));
     }
 
-    /**
-     * Deletes the rows Android does not hold, so the table only claims what is actually watched, and
-     * names them in the log. Returns the dropped rows.
-     */
-    private List<Region> dropUnregisteredRegions(Region[] all, List<Region> registered) {
-        Set<String> kept = new HashSet<>();
-        for (Region region : registered) {
-            kept.add(region.identifier);
+    /** The regions of {@code all} whose identifier is not in {@code kept}, in the order of {@code all}. */
+    static List<Region> missingFrom(Collection<Region> all, List<Region> kept) {
+        Set<String> keptIds = new HashSet<>();
+        for (Region region : kept) {
+            keptIds.add(region.identifier);
         }
-        List<Region> dropped = new ArrayList<>();
+        List<Region> missing = new ArrayList<>();
         for (Region region : all) {
-            if (!kept.contains(region.identifier)) {
-                db.getRegionsDAO().deleteRegionFromId(region.identifier);
-                dropped.add(region);
+            if (!keptIds.contains(region.identifier)) {
+                missing.add(region);
             }
         }
-        if (!dropped.isEmpty()) {
-            Logger.getInstance().w(dropped.size() + " geofences not registered: Android allows " + MAX_NATIVE_GEOFENCES
-                    + " per app. Removed from the regions table: " + identifiers(dropped));
+        return missing;
+    }
+
+    /**
+     * Deletes the rows the SDK's own cap left out of {@code planned}, so the table only claims what
+     * the SDK asked Android to watch, and names them in the log.
+     */
+    private void dropRegionsOverCap(Region[] circles, List<Region> planned) {
+        List<Region> dropped = missingFrom(Arrays.asList(circles), planned);
+        for (Region region : dropped) {
+            db.getRegionsDAO().deleteRegionFromId(region.identifier);
         }
-        return dropped;
+        if (!dropped.isEmpty()) {
+            Logger.getInstance().w(dropped.size() + " geofences over the " + MAX_NATIVE_GEOFENCES
+                    + " per app Android allows. Removed from the regions table: " + identifiers(dropped));
+        }
+    }
+
+    /** Names the planned rows Android refused as too many; they stay in the table for the next restore. */
+    private static void logRefusedRegions(List<Region> planned, List<Region> registered) {
+        List<Region> refused = missingFrom(planned, registered);
+        if (!refused.isEmpty()) {
+            Logger.getInstance().w(refused.size() + " geofences refused by Android as too many (the host app's own"
+                    + " geofences count too). Kept in the regions table for the next restore: " + identifiers(refused));
+        }
     }
 
     @SuppressLint("MissingPermission")
-    private AddOutcome addToGeofencingClient(List<Region> regions) {
+    private AddOutcome addToGeofencingClient(List<Region> regions, long deadlineNanos) {
         // LatLng takes latitude first; the old restore passed (lng, lat) and put every geofence on
         // the wrong side of the world.
-        GeofencingRequest.Builder request = new GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        List<Geofence> geofences = new ArrayList<>();
         for (Region regionToAdd : regions) {
-            request.addGeofence(geofenceHelper.getGeofence(regionToAdd.identifier,
+            geofences.add(geofenceHelper.getGeofence(regionToAdd.identifier,
                     new LatLng(regionToAdd.lat, regionToAdd.lng), (float) regionToAdd.radius, GEOFENCE_TRANSITIONS));
         }
-        Exception failure = await(mGeofencingClient.addGeofences(request.build(), getGeofencePendingIntent()));
+        Exception failure = await(mGeofencingClient.addGeofences(
+                geofenceHelper.getGeofencingRequest(geofences), getGeofencePendingIntent()), deadlineNanos);
         if (failure == null) {
             return AddOutcome.ADDED;
         }
@@ -242,10 +281,16 @@ class LocationManagerCore extends LocationManagerProvider{
                 && ((ApiException) e).getStatusCode() == GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES;
     }
 
-    /** Waits for a Play Services call. Returns {@code null} on success, otherwise the failure. */
-    private static Exception await(Task<Void> task) {
+    /**
+     * Waits for a Play Services call: at most {@link #GEOFENCE_TASK_TIMEOUT_MS}, and never past
+     * {@code deadlineNanos} (a {@link System#nanoTime()} value). Returns {@code null} on success,
+     * otherwise the failure; a {@link TimeoutException} once the deadline has passed.
+     */
+    private static Exception await(Task<Void> task, long deadlineNanos) {
+        long remainingMs = TimeUnit.NANOSECONDS.toMillis(deadlineNanos - System.nanoTime());
+        long timeoutMs = Math.max(1, Math.min(GEOFENCE_TASK_TIMEOUT_MS, remainingMs));
         try {
-            Tasks.await(task, GEOFENCE_TASK_TIMEOUT_S, TimeUnit.SECONDS);
+            Tasks.await(task, timeoutMs, TimeUnit.MILLISECONDS);
             return null;
         } catch (ExecutionException e) {
             return e.getCause() instanceof Exception ? (Exception) e.getCause() : e;

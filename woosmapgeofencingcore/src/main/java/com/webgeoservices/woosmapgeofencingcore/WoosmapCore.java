@@ -172,7 +172,9 @@ public class WoosmapCore extends WoosmapProvider{
         if (this.shouldTrackUser()) {
             this.locationManagerCore.setmLocationRequest();
             this.locationManagerCore.updateLocationBackground();
-            this.locationManagerCore.setMonitoringRegions();
+            // Runs on the reboot job's background thread, so the restore may wait on Play Services.
+            boolean restored = this.locationManagerCore.setMonitoringRegions();
+            Logger.getInstance().d("onReboot. Geofences restored: " + restored);
         } else {
             Logger.getInstance().e("Get Location permissions error");
         }

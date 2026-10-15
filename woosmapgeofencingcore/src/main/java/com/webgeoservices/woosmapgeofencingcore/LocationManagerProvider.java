@@ -127,5 +127,11 @@ public abstract class LocationManagerProvider {
         }
     }
 
-    public abstract void setMonitoringRegions();
+    /**
+     * Re-registers the stored circular regions with Android and makes the regions table match what
+     * Android holds. Waits on Play Services, so it must run off the main thread.
+     *
+     * @return {@code true} when every stored circular region is registered.
+     */
+    public abstract boolean setMonitoringRegions();
 }

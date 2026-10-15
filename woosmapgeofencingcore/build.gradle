@@ -84,7 +84,7 @@ dependencies {
 
     //implementation 'com.google.guava:guava:33.4.0-jre'
     implementation 'com.google.code.gson:gson:2.14.0'
-    implementation 'org.ojalgo:ojalgo:56.2.1'
+    implementation 'org.ojalgo:ojalgo:57.0.0'
     implementation 'com.google.android.gms:play-services-location:21.3.0'
     implementation 'com.android.volley:volley:1.2.1'
 

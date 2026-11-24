@@ -8,7 +8,6 @@ import android.util.Log
 import android.util.Pair
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
-import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.gson.Gson
@@ -195,7 +194,8 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
     protected fun saveRegionLogInDataBase(region: Region, isInside: Boolean): RegionLog {
         var regionLog = RegionLog()
         regionLog.identifier = region.identifier
-        regionLog.dateTime = region.dateTime
+        // Not region.dateTime: that is the region's previous state change unless the caller just set it (#85).
+        regionLog.dateTime = System.currentTimeMillis()
         regionLog.didEnter = isInside
         regionLog.lat = region.lat
         regionLog.lng = region.lng
@@ -1072,48 +1072,27 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
         this.eventRegionDataListener = eventRegionDataListener
     }
 
+    /**
+     * Handles a geofence transition reported by Android. A transition that leaves the region in the
+     * state the SDK already holds writes no region log and leaves its dwell record and `dateTime`
+     * alone (#85).
+     */
     protected open fun didEventRegionHelper(transition: Int,regionDetected: Region){
-        if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            regionDetected.didEnter = true
-        } else if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-            regionDetected.didEnter = false
-        }
-
-        var regionLog = RegionLog()
-        regionLog.identifier = regionDetected.identifier
-        regionLog.dateTime = regionDetected.dateTime
-        regionLog.didEnter = regionDetected.didEnter
-        regionLog.lat = regionDetected.lat
-        regionLog.lng = regionDetected.lng
-        regionLog.idStore = regionDetected.idStore
-        regionLog.radius = regionDetected.radius
-        regionLog.isCurrentPositionInside = regionDetected.isCurrentPositionInside
-
-        if (regionDetected.didEnter) {
-            regionLog.eventName = "woos_geofence_entered_event"
-        } else {
-            regionLog.eventName = "woos_geofence_exited_event"
-        }
-        regionLog=getRegionLogWithDurationLog(regionLog,regionDetected.didEnter)
-        if (regionDetected.didEnter != regionDetected.isCurrentPositionInside) {
-
-            regionLog.isCurrentPositionInside = regionDetected.didEnter
-            regionDetected.isCurrentPositionInside = regionDetected.didEnter
-
-            this.db.regionLogsDAO.createRegionLog(regionLog)
-
-            regionDetected.dateTime = System.currentTimeMillis()
+        var regionLog = NativeRegionTransition.applyTransition(
+            regionDetected, transition, System.currentTimeMillis())
+        if (regionLog == null) {
+            // Only didEnter may have changed: Android has now announced the crossing too.
             this.db.regionsDAO.updateRegion(regionDetected)
-
-            if (woosmapProvider.regionLogReadyListener != null) {
-                woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
-            }
-            eventRegionDataListener?.eventRegionData(regionDetected,regionLog)
-        } else {
-            this.db.regionLogsDAO.createRegionLog(regionLog)
-            regionDetected.dateTime = System.currentTimeMillis()
-            this.db.regionsDAO.updateRegion(regionDetected)
+            return
         }
+        regionLog = getRegionLogWithDurationLog(regionLog, regionDetected.didEnter)
+        this.db.regionLogsDAO.createRegionLog(regionLog)
+        this.db.regionsDAO.updateRegion(regionDetected)
+
+        if (woosmapProvider.regionLogReadyListener != null) {
+            woosmapProvider.regionLogReadyListener.RegionLogReadyCallback(regionLog)
+        }
+        eventRegionDataListener?.eventRegionData(regionDetected,regionLog)
     }
 
     fun removeGeofence(id: String) {

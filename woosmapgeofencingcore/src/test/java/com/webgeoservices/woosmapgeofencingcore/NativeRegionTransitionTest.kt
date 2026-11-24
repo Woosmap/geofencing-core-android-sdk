@@ -29,37 +29,37 @@ class NativeRegionTransitionTest {
     }
 
     @Test fun anExitIsStampedWithTheTimeItWasHandledNotTheTimeOfTheEnter() {
-        val log = NativeRegionTransition.regionLogFor(region(inside = true), Geofence.GEOFENCE_TRANSITION_EXIT, now)
+        val log = NativeRegionTransition.applyTransition(region(inside = true), Geofence.GEOFENCE_TRANSITION_EXIT, now)
 
         assertEquals(now, log!!.dateTime)
     }
 
     @Test fun anEnterIsStampedWithTheTimeItWasHandledNotTheTimeTheRegionWasCreated() {
-        val log = NativeRegionTransition.regionLogFor(region(inside = false), Geofence.GEOFENCE_TRANSITION_ENTER, now)
+        val log = NativeRegionTransition.applyTransition(region(inside = false), Geofence.GEOFENCE_TRANSITION_ENTER, now)
 
         assertEquals(now, log!!.dateTime)
     }
 
     @Test fun anExitFromARegionTheDeviceIsOutsideWritesNoLog() {
-        val log = NativeRegionTransition.regionLogFor(region(inside = false), Geofence.GEOFENCE_TRANSITION_EXIT, now)
+        val log = NativeRegionTransition.applyTransition(region(inside = false), Geofence.GEOFENCE_TRANSITION_EXIT, now)
 
         assertNull(log)
     }
 
     @Test fun anEnterIntoARegionTheDeviceIsInsideWritesNoLog() {
-        val log = NativeRegionTransition.regionLogFor(region(inside = true), Geofence.GEOFENCE_TRANSITION_ENTER, now)
+        val log = NativeRegionTransition.applyTransition(region(inside = true), Geofence.GEOFENCE_TRANSITION_ENTER, now)
 
         assertNull(log)
     }
 
     @Test fun anEnterIsLoggedAsAnEnteredEvent() {
-        val log = NativeRegionTransition.regionLogFor(region(inside = false), Geofence.GEOFENCE_TRANSITION_ENTER, now)
+        val log = NativeRegionTransition.applyTransition(region(inside = false), Geofence.GEOFENCE_TRANSITION_ENTER, now)
 
         assertEquals("woos_geofence_entered_event", log!!.eventName)
     }
 
     @Test fun anExitIsLoggedAsAnExitedEvent() {
-        val log = NativeRegionTransition.regionLogFor(region(inside = true), Geofence.GEOFENCE_TRANSITION_EXIT, now)
+        val log = NativeRegionTransition.applyTransition(region(inside = true), Geofence.GEOFENCE_TRANSITION_EXIT, now)
 
         assertEquals("woos_geofence_exited_event", log!!.eventName)
     }
@@ -67,7 +67,7 @@ class NativeRegionTransitionTest {
     @Test fun anEnterMarksTheRegionAsInside() {
         val region = region(inside = false)
 
-        NativeRegionTransition.regionLogFor(region, Geofence.GEOFENCE_TRANSITION_ENTER, now)
+        NativeRegionTransition.applyTransition(region, Geofence.GEOFENCE_TRANSITION_ENTER, now)
 
         assertTrue(region.isCurrentPositionInside)
     }
@@ -75,7 +75,7 @@ class NativeRegionTransitionTest {
     @Test fun anExitMarksTheRegionAsOutside() {
         val region = region(inside = true)
 
-        NativeRegionTransition.regionLogFor(region, Geofence.GEOFENCE_TRANSITION_EXIT, now)
+        NativeRegionTransition.applyTransition(region, Geofence.GEOFENCE_TRANSITION_EXIT, now)
 
         assertFalse(region.isCurrentPositionInside)
     }
@@ -84,13 +84,54 @@ class NativeRegionTransitionTest {
     @Test fun anEnterTheSdkAlreadySawIsStillRecordedAsAnnouncedByAndroid() {
         val region = region(inside = true).apply { didEnter = false }
 
-        NativeRegionTransition.regionLogFor(region, Geofence.GEOFENCE_TRANSITION_ENTER, now)
+        NativeRegionTransition.applyTransition(region, Geofence.GEOFENCE_TRANSITION_ENTER, now)
 
         assertTrue(region.didEnter)
     }
 
+    @Test fun aTransitionStampsTheRegionWithTheTimeItWasHandled() {
+        val region = region(inside = true)
+
+        NativeRegionTransition.applyTransition(region, Geofence.GEOFENCE_TRANSITION_EXIT, now)
+
+        assertEquals(now, region.dateTime)
+    }
+
+    @Test fun aTransitionThatChangesNothingLeavesTheRegionsDateTimeAlone() {
+        val region = region(inside = true)
+
+        NativeRegionTransition.applyTransition(region, Geofence.GEOFENCE_TRANSITION_ENTER, now)
+
+        assertEquals(enteredAt, region.dateTime)
+    }
+
+    // Neither SDK forwards a dwell today; the region must not move if one ever arrives.
+    @Test fun aDwellWritesNoLogEvenWhenAndroidHasNotAnnouncedTheSdksState() {
+        val region = region(inside = true).apply { didEnter = false }
+
+        val log = NativeRegionTransition.applyTransition(region, Geofence.GEOFENCE_TRANSITION_DWELL, now)
+
+        assertNull(log)
+    }
+
+    @Test fun aDwellLeavesTheRegionInside() {
+        val region = region(inside = true).apply { didEnter = false }
+
+        NativeRegionTransition.applyTransition(region, Geofence.GEOFENCE_TRANSITION_DWELL, now)
+
+        assertTrue(region.isCurrentPositionInside)
+    }
+
+    @Test fun aDwellLeavesTheRegionsDateTimeAlone() {
+        val region = region(inside = true)
+
+        NativeRegionTransition.applyTransition(region, Geofence.GEOFENCE_TRANSITION_DWELL, now)
+
+        assertEquals(enteredAt, region.dateTime)
+    }
+
     @Test fun theLogDescribesTheRegion() {
-        val log = NativeRegionTransition.regionLogFor(region(inside = false), Geofence.GEOFENCE_TRANSITION_ENTER, now)
+        val log = NativeRegionTransition.applyTransition(region(inside = false), Geofence.GEOFENCE_TRANSITION_ENTER, now)
 
         assertEquals("home", log!!.identifier)
     }

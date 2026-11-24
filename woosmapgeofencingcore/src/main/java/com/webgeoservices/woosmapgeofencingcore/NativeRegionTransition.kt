@@ -8,22 +8,24 @@ import com.webgeoservices.woosmapgeofencingcore.database.RegionLog
 internal object NativeRegionTransition {
 
     /**
-     * Records the transition on [region] and builds its region log, stamped with [now]: the
-     * region's own `dateTime` is the time of its previous state change (#85).
+     * Records the transition on [region] and builds its region log. Both are stamped with [now]:
+     * until then the region's `dateTime` is the time of its previous state change (#85).
      *
      * @return the log to store, or `null` when the region was already in the reported state, in
-     * which case only `didEnter` may have changed
+     * which case only `didEnter` may have changed. A transition other than an enter or an exit
+     * changes nothing.
      */
-    fun regionLogFor(region: Region, transition: Int, now: Long): RegionLog? {
-        if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            region.didEnter = true
-        } else if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-            region.didEnter = false
+    fun applyTransition(region: Region, transition: Int, now: Long): RegionLog? {
+        region.didEnter = when (transition) {
+            Geofence.GEOFENCE_TRANSITION_ENTER -> true
+            Geofence.GEOFENCE_TRANSITION_EXIT -> false
+            else -> return null
         }
         if (region.didEnter == region.isCurrentPositionInside) {
             return null
         }
         region.isCurrentPositionInside = region.didEnter
+        region.dateTime = now
 
         val regionLog = RegionLog()
         regionLog.identifier = region.identifier

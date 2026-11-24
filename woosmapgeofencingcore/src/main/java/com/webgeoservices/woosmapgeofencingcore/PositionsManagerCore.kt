@@ -1074,18 +1074,18 @@ open class PositionsManagerCore(context: Context, db: WoosmapDb, woosmapProvider
 
     /**
      * Handles a geofence transition reported by Android. A transition that leaves the region in the
-     * state the SDK already holds writes no region log and leaves its dwell record alone (#85).
+     * state the SDK already holds writes no region log and leaves its dwell record and `dateTime`
+     * alone (#85).
      */
     protected open fun didEventRegionHelper(transition: Int,regionDetected: Region){
-        val now = System.currentTimeMillis()
-        val regionLog = NativeRegionTransition.regionLogFor(regionDetected, transition, now)
-        regionDetected.dateTime = now
+        var regionLog = NativeRegionTransition.applyTransition(
+            regionDetected, transition, System.currentTimeMillis())
         if (regionLog == null) {
             // Only didEnter may have changed: Android has now announced the crossing too.
             this.db.regionsDAO.updateRegion(regionDetected)
             return
         }
-        getRegionLogWithDurationLog(regionLog, regionDetected.didEnter)
+        regionLog = getRegionLogWithDurationLog(regionLog, regionDetected.didEnter)
         this.db.regionLogsDAO.createRegionLog(regionLog)
         this.db.regionsDAO.updateRegion(regionDetected)
 
